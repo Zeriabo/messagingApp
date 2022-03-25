@@ -17,17 +17,6 @@ import java.sql.ResultSetMetaData;
 import java.util.ArrayList;
 import fi.invian.codingassignment.pojos.Response;
 
-//try (Connection c = DatabaseConnection.getConnection()) {
-//    try (PreparedStatement p = c.prepareStatement("SELECT messagebody FROM messages")) {
-//        ResultSet r = p.executeQuery();
-//        if (r.next()) {
-//            return new HelloPojo(r.getString(1));
-//        } else {
-//            throw new NotFoundException("Database did not contain the expected message.");
-//        }
-//    }
-//}
-
 @Path("/readmessage")
 
 public class ReadMessageEndpoint {

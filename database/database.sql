@@ -99,12 +99,18 @@ VALUES
 
 INSERT INTO `messaging`.`messages`
 VALUES
-(1,'Zeriab message','hello this is a message form zeriab','2021-03-24 15:00:00', 3,1)
+(1,'Zeriab message','hello this is a message form zeriab','2021-03-24 15:00:00', 3,1),
+(2,'Zeriab2 message','hello this is a message form zeriab2','2021-03-25 15:00:00', 2,2)
+
 ;
 
 INSERT INTO `messaging`.`sender`
 VALUES
 (1,'2021-03-24 15:00:00')
+;
+INSERT INTO `messaging`.`sender`
+VALUES
+(2,'2021-03-25 15:00:00')
 ;
 INSERT INTO `messaging`.`receiver` 
 VALUES
@@ -117,5 +123,13 @@ VALUES
 INSERT INTO `messaging`.`receiver` 
 VALUES
 (4,'2021-03-24 15:00:00',1,1)
+;
+INSERT INTO `messaging`.`receiver` 
+VALUES
+(3,'2021-03-25 15:00:00',2,2)
+;
+INSERT INTO `messaging`.`receiver` 
+VALUES
+(1,'2021-03-25 15:00:00',2,2)
 ;
 
