@@ -1,0 +1,20 @@
+version: '3'
+services:
+  codingassignment:
+    container_name: "codingassignment"
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+      - "5005:5005"
+  codingassignment-db:
+    container_name: "codingassignment-db"
+    image: mariadb
+    volumes:
+      - ./database:/docker-entrypoint-initdb.d/
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_DATABASE: messaging
+      MYSQL_ROOT_PASSWORD: root_password
