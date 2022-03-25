@@ -57,11 +57,10 @@ public class SendMessageEndpoint {
     	Email email= mapper.readValue(messageDetails,Email.class);
     	int messageId = -1;
     	
-    	
-		System.out.print(messageDetails);
+  
 		Response response = new Response();
 		 int senderId=Integer.parseInt(email.getSenderId());
-		String[] receiversArray= email.getReceivers().split(",");
+		String[] receiversArray= email.getReceivers().split(","); // if length >5 gives error
 		for(String e : receiversArray) {
 		System.out.print(e);
 		}
@@ -125,9 +124,6 @@ public class SendMessageEndpoint {
 					ins2.setInt(4, senderId);
 				 ins2.executeUpdate();
 			 }
-			
-			
-			
 			
 			}
 			}

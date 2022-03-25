@@ -86,7 +86,9 @@ ENGINE = InnoDB;
 SET SQL_MODE=@OLD_SQL_MODE;
 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
-
+ALTER TABLE `messaging`.`users` 
+ADD UNIQUE INDEX `email_UNIQUE` (`email` ASC) VISIBLE;
+;
 INSERT INTO `messaging`.`users`(name,email) 
 VALUES
 ('Zeriab','zeriab@hotmail.com'),
