@@ -63,14 +63,12 @@ public class ReadMessageEndpoint {
 				if (userId > -1) {
 					System.out.println("enterring the big query");
 					PreparedStatement statement2 = c.prepareStatement(
-							"SELECT messaging.receiver.receiver_idusers,messaging.messages.datetime,messaging.messages.idmessages\n"
-									+ ",sender.name senderName,sender.email senderEmail, messaging.messages.messagebody,receivers.name,receivers.email\n"
-									+ "  FROM \n"
-									+ "messaging.receiver, messaging.messages , messaging.users sender, messaging.users receivers\n"
-									+ "where messaging.receiver.messages_idmessages =  messaging.messages.idmessages\n"
-									+ "And sender.idusers= messaging.messages.idsender\n"
-									+ "And receivers.idusers=messaging.receiver.receiver_idusers\n"
-									+ "And messaging.receiver.receiver_idusers=?");
+							"SELECT messaging.messages.messagebody\n"
+							+ "  FROM messaging.receiver, messaging.messages , messaging.users sender, messaging.users receivers\n"
+							+ "where messaging.receiver.messages_idmessages =  messaging.messages.idmessages\n"
+							+ "And sender.idusers= messaging.messages.idsender\n"
+							+ "And receivers.idusers=messaging.receiver.receiver_idusers\n"
+							+ "And messaging.receiver.receiver_idusers=?");
 
 					statement2.setInt(1, userId);
 
@@ -81,28 +79,10 @@ public class ReadMessageEndpoint {
 						columnsNumber = rsmd.getColumnCount();
 						String columnValue = "";
 						System.out.println("the column number is " + columnsNumber);
+						columnValue = rs.getString(1);
+						resultsArray.add("message: "+columnValue);
 
-						for (int i = 1; i <= columnsNumber; i++) {
-
-							if (i == 2 || i == 4 || i == 5 || i == 6) {
-								columnValue = rs.getString(i);
-								System.out.println(rsmd.getColumnName(i) + " : " + columnValue);
-								resultsArray.add(rsmd.getColumnName(i) + " : " + columnValue);
-							}
-							if (i == 7 || i == 8) {
-								columnValue = rs.getString(i);
-								System.out.println(rsmd.getColumnName(i) + " Of receiver : " + columnValue);
-								resultsArray.add(rsmd.getColumnName(i) + " Of receiver : " + columnValue);
-							}
-
-							if (i == 1 || i == 3) {
-								columnValue = Integer.toString(rs.getInt(i));
-								resultsArray.add(rsmd.getColumnName(i) + " : " + columnValue);
-
-								System.out.println(rsmd.getColumnName(i) + " : " + columnValue);
-							}
-						}
-
+						resultsArray.add(",");
 					}
 
 				}
