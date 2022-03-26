@@ -52,8 +52,9 @@ public class topTenUserStatisticsEndpoint {
 						columnValue = rs.getString(i);
 
 					}
+				
 					resultsArray.add(columnValue);
-
+					
 				}
 			}
 		}
@@ -61,7 +62,7 @@ public class topTenUserStatisticsEndpoint {
 			response.setStatus(true);
 			resultsArray.forEach((mess) -> {
 				if (mess != null) {
-					
+
 					response.setMessage(response.getMessage() + " " + mess);
 				}
 			});

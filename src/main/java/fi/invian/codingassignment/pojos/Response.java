@@ -7,7 +7,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 public class Response {
 
 	private boolean status;
-	private String message;
+	private String message="";
 
 	public boolean isStatus() {
 		return status;

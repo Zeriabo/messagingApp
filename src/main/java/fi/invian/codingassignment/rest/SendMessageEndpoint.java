@@ -17,7 +17,6 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import fi.invian.codingassignment.pojos.Response;
 
-
 @Path("/sendmessage")
 public class SendMessageEndpoint {
 	int row = 0;
@@ -49,7 +48,7 @@ public class SendMessageEndpoint {
 
 						Message message = new Message(email.getId(), email.getTitle(), email.getMessagebody(),
 								email.getDatetime(), senderId);
-			
+
 						PreparedStatement statement = c.prepareStatement(
 								"INSERT INTO messages(`title`, `messagebody`, `datetime`, `nbrofrecipients`, `idsender`) VALUES(?,?,?,?,?)",
 								Statement.RETURN_GENERATED_KEYS);
@@ -65,7 +64,6 @@ public class SendMessageEndpoint {
 						while (keys.next()) {
 							messageId = keys.getInt(1);
 						}
-						System.out.println("Last Key: " + messageId);
 
 						PreparedStatement s1 = c.prepareStatement("SELECT * FROM users where idusers=?");
 						s1.setInt(1, senderId);
@@ -89,7 +87,6 @@ public class SendMessageEndpoint {
 									"INSERT INTO receiver(`receiver_idusers`, `datetime`, `messages_idmessages`, `messages_idsender`) VALUES(?,?,?,?) ");
 							ins2.setInt(1, rec.getIdUser());
 							ins2.setString(2, message.getDatetime().toString());
-							System.out.println(message.getId() + message.getTitle());
 							ins2.setInt(3, messageId);
 							ins2.setInt(4, senderId);
 							ins2.executeUpdate();
