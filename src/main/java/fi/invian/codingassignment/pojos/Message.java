@@ -19,6 +19,10 @@ public class Message {
 		this.idUser = idUser;
 	}
 
+	public Message() {
+		// TODO Auto-generated constructor stub
+	}
+
 	public int getIdUser() {
 		return idUser;
 	}
@@ -58,5 +62,10 @@ public class Message {
 	public void setId(int id) {
 		this.id = id;
 	}
-
+	public String toString() {
+		
+	String s =(this.id+ " "+this.idUser+ " "+this.messagebody+ " "+this.title+ " ");
+	return s;
+	   
+	}
 }

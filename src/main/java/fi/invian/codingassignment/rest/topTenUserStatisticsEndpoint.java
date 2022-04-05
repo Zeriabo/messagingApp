@@ -63,13 +63,13 @@ public class topTenUserStatisticsEndpoint {
 			resultsArray.forEach((mess) -> {
 				if (mess != null) {
 
-					response.setMessage(response.getMessage() + " " + mess);
+			//		response.setMessage(response.getMessage() + " " + mess);
 				}
 			});
 
 		} else {
 			response.setStatus(false);
-			response.setMessage("didnt get Anything");
+	//		response.setMessage("didnt get Anything");
 		}
 		return response;
 

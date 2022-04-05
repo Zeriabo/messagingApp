@@ -1,5 +1,8 @@
 package fi.invian.codingassignment.rest;
 
+import javax.crypto.Cipher;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.IvParameterSpec;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -8,19 +11,29 @@ import javax.ws.rs.core.MediaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fi.invian.codingassignment.app.DatabaseConnection;
 import fi.invian.codingassignment.pojos.Email;
+import fi.invian.codingassignment.pojos.Encryption;
 import fi.invian.codingassignment.pojos.Message;
+import fi.invian.codingassignment.pojos.MessagesPojo;
 import fi.invian.codingassignment.pojos.Receiver;
 import fi.invian.codingassignment.pojos.Sender;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.security.AlgorithmParameters;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
+
 import fi.invian.codingassignment.pojos.Response;
 
 @Path("/sendmessage")
 public class SendMessageEndpoint {
 	int row = 0;
 
+	@SuppressWarnings("resource")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	@POST
@@ -29,12 +42,25 @@ public class SendMessageEndpoint {
 
 		ObjectMapper mapper = new ObjectMapper();
 		Email email = mapper.readValue(messageDetails, Email.class);
+		Encryption enc = new Encryption();
 		int messageId = -1;
-
+		int sQuery=0;
+		int rQuery=0;
+		ArrayList<Message> messagesList = new ArrayList<Message>();;
 		Response response = new Response();
 		int senderId = Integer.parseInt(email.getSenderId());
-		String[] receiversArray = email.getReceivers().split(",");
-		if (receiversArray.length <= 5) {
+		List<String> receiversArray = email.getReceivers();
+		String path = "/Users/zeriab/Desktop/codingassignment/secrets/secret";
+		File passwords=new File(path);
+		passwords.getParentFile().mkdirs(); // Will create parent directories if not exists
+		passwords.createNewFile();
+		java.io.FileInputStream fis = new FileInputStream(path);
+		 java.io.FileOutputStream fos = null;
+		 fos = new java.io.FileOutputStream(passwords);
+		 
+		MessagesPojo messages=new MessagesPojo(senderId,messagesList);
+		if (receiversArray.size()<= 5) {
+
 			for (String receiverEmail : receiversArray) {
 				try (Connection c = DatabaseConnection.getConnection()) {
 					PreparedStatement p1 = c.prepareStatement("SELECT * FROM users where email=?");
@@ -44,18 +70,28 @@ public class SendMessageEndpoint {
 
 						PreparedStatement p2 = c.prepareStatement("SELECT * FROM users where idusers=?");
 
-						p2.setInt(1, Integer.parseInt(email.getSenderId()));
-
+					p2.setInt(1, Integer.parseInt(email.getSenderId()));
+						java.sql.Timestamp datetime=  new java.sql.Timestamp(email.getDatetime().getTime());
 						Message message = new Message(email.getId(), email.getTitle(), email.getMessagebody(),
-								email.getDatetime(), senderId);
-
+								datetime , senderId);
+						
+						SecretKey secretKey=Encryption.generateKey(128);
+						Cipher ecipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+						ecipher.init(Cipher.ENCRYPT_MODE, secretKey);
+						AlgorithmParameters params = ecipher.getParameters();
+					 byte[] iv = params.getParameterSpec(IvParameterSpec.class).getIV();
+						
+					String encryptedMessage=Encryption.encrypt(ecipher.getAlgorithm(), email.getMessagebody(), secretKey, new IvParameterSpec(iv));
+						message.setMessagebody(encryptedMessage);
+						messages.addMessage(message);
 						PreparedStatement statement = c.prepareStatement(
 								"INSERT INTO messages(`title`, `messagebody`, `datetime`, `nbrofrecipients`, `idsender`) VALUES(?,?,?,?,?)",
 								Statement.RETURN_GENERATED_KEYS);
+				
 						statement.setString(1, message.getTitle());
 						statement.setString(2, message.getMessagebody());
-						statement.setString(3, message.getDatetime().toString());
-						statement.setInt(4, receiversArray.length);
+						statement.setTimestamp(3,datetime);
+						statement.setInt(4, receiversArray.size());
 						statement.setInt(5, senderId);
 
 						statement.executeQuery();
@@ -64,7 +100,22 @@ public class SendMessageEndpoint {
 						while (keys.next()) {
 							messageId = keys.getInt(1);
 						}
-
+						PreparedStatement statementsecret = c.prepareStatement(
+								"INSERT INTO `messaging`.`secret_keys`\n"
+								+ "(`secret_key`,\n"
+								+ "`messages_idmessages`,\n"
+								+ "`messages_idsender`)\n"
+								+ "VALUES\n"
+								+ "(?,?,?);"
+								+ "",
+								Statement.RETURN_GENERATED_KEYS);
+						byte[] key  = secretKey.getEncoded();
+						statementsecret.setBytes(1,key);
+						statementsecret.setInt(2,messageId);
+						statementsecret.setInt(3, senderId);
+						
+						statementsecret.executeQuery();
+						
 						PreparedStatement s1 = c.prepareStatement("SELECT * FROM users where idusers=?");
 						s1.setInt(1, senderId);
 
@@ -77,32 +128,51 @@ public class SendMessageEndpoint {
 						PreparedStatement ins1 = c
 								.prepareStatement("INSERT INTO sender(`users_idusers`, `datetime`) VALUES(?,?) ");
 						ins1.setInt(1, sender.getIdUser());
-						ins1.setString(2, email.getDatetime().toString());
+						ins1.setTimestamp(2, datetime);
 
-						ins1.executeUpdate();
+						 sQuery=ins1.executeUpdate();
 
 						Receiver rec = new Receiver(r.getInt(1), r.getString(2), r.getString(3));
 						if (messageId >= 0) {
 							PreparedStatement ins2 = c.prepareStatement(
-									"INSERT INTO receiver(`receiver_idusers`, `datetime`, `messages_idmessages`, `messages_idsender`) VALUES(?,?,?,?) ");
+									"INSERT INTO receiver(`users_idusers`, `datetime`, `messages_idmessages`, `messages_idsender`) VALUES(?,?,?,?) ");
 							ins2.setInt(1, rec.getIdUser());
-							ins2.setString(2, message.getDatetime().toString());
+							ins2.setTimestamp(2,datetime);
 							ins2.setInt(3, messageId);
 							ins2.setInt(4, senderId);
-							ins2.executeUpdate();
+							 rQuery=ins2.executeUpdate();
+							
+							
 						}
 
+					}else {
+						response.setStatus(false);
+						response.setErrorMessage("ERROR: Wrong input");
+						response.setCode(500);
 					}
+				}catch(Exception e)
+				{
+					response.setStatus(false);
+					response.setErrorMessage(e.getMessage());
+					response.setCode(e.hashCode());
+					
 				}
 			}
-			response.setStatus(true);
-			response.setMessage("Submitted data " + messageDetails);
-		} else if (receiversArray.length > 5) {
+			if(messageId!=0 && rQuery>0 && sQuery>0 )
+			{
+				Response successResponse = new Response(200,true,messages);
+				return successResponse;
+			}
+
+	
+		} else if (receiversArray.size() > 5) {
 			response.setStatus(false);
-			response.setMessage("Maximum 5 recipients");
+			response.setCode(500);
+			response.setErrorMessage("more than 5 receipient");
 		} else {
 			response.setStatus(false);
-			response.setMessage("ERROR : not inserted");
+	     	response.setErrorMessage("ERROR : not inserted");
+			response.setCode(500);
 		}
 
 		return response;

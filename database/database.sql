@@ -6,16 +6,6 @@ SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,N
 
 
 -- -----------------------------------------------------
--- Schema messaging
--- -----------------------------------------------------
-CREATE SCHEMA IF NOT EXISTS `messaging` DEFAULT CHARACTER SET utf8 ;
-
-
-
-
-USE `messaging` ;
-
--- -----------------------------------------------------
 -- Table `messaging`.`users`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `messaging`.`users` (
@@ -51,7 +41,7 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `messaging`.`sender` (
   `users_idusers` INT NOT NULL,
-  `datetime` VARCHAR(45) NOT NULL,
+  `datetime` DATETIME NOT NULL,
   INDEX `fk_sender_users_idx` (`users_idusers` ASC) VISIBLE,
   CONSTRAINT `fk_sender_users`
     FOREIGN KEY (`users_idusers`)
@@ -65,14 +55,14 @@ ENGINE = InnoDB;
 -- Table `messaging`.`receiver`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `messaging`.`receiver` (
-  `receiver_idusers` INT NOT NULL,
-  `datetime` VARCHAR(45) NOT NULL,
+  `users_idusers` INT NOT NULL,
+  `datetime` DATETIME NOT NULL,
   `messages_idmessages` INT NOT NULL,
   `messages_idsender` INT NOT NULL,
-  INDEX `fk_receiver_users1_idx` (`receiver_idusers` ASC) VISIBLE,
-  PRIMARY KEY ( `receiver_idusers`,`messages_idmessages`, `messages_idsender`),
+  INDEX `fk_receiver_users1_idx` (`users_idusers` ASC) VISIBLE,
+  PRIMARY KEY (`messages_idmessages`, `messages_idsender`),
   CONSTRAINT `fk_receiver_users1`
-    FOREIGN KEY (`receiver_idusers`)
+    FOREIGN KEY (`users_idusers`)
     REFERENCES `messaging`.`users` (`idusers`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
@@ -83,53 +73,37 @@ CREATE TABLE IF NOT EXISTS `messaging`.`receiver` (
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
+
+-- -----------------------------------------------------
+-- Table `messaging`.`secret_keys`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `messaging`.`secret_keys` (
+  `idsecret_keys` INT NOT NULL AUTO_INCREMENT,
+  `secret_key` BLOB NULL,
+  `messages_idmessages` INT NOT NULL,
+  `messages_idsender` INT NOT NULL,
+  PRIMARY KEY (`idsecret_keys`),
+  INDEX `fk_secret_keys_messages1_idx` (`messages_idmessages` ASC, `messages_idsender` ASC) VISIBLE,
+  CONSTRAINT `fk_secret_keys_messages1`
+    FOREIGN KEY (`messages_idmessages` , `messages_idsender`)
+    REFERENCES `messaging`.`messages` (`idmessages` , `idsender`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
 SET SQL_MODE=@OLD_SQL_MODE;
 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
-ALTER TABLE `messaging`.`users` 
-ADD UNIQUE INDEX `email_UNIQUE` (`email` ASC) VISIBLE;
-;
-INSERT INTO `messaging`.`users`(name,email) 
+
+
+INSERT INTO `messaging`.`users`(name,email,password) 
 VALUES
-('Zeriab','zeriab@hotmail.com'),
-('Zeriab2','zeriab2@hotmail.com'),
-('Zeriab3','zeriab3@hotmail.com'),
-('Zeriab4','zeriab4@hotmail.com')
+('Zeriab','zeriab@hotmail.com','12345'),
+('Zeriab2','zeriab2@hotmail.com','12345'),
+('Zeriab3','zeriab3@hotmail.com','12345'),
+('Zeriab4','zeriab4@hotmail.com','12345')
 ;
 
-INSERT INTO `messaging`.`messages`
-VALUES
-(1,'Zeriab message','hello this is a message form zeriab','2021-03-24 15:00:00', 3,1),
-(2,'Zeriab2 message','hello this is a message form zeriab2','2021-03-25 15:00:00', 2,2)
 
-;
-
-INSERT INTO `messaging`.`sender`
-VALUES
-(1,'2021-03-24 15:00:00')
-;
-INSERT INTO `messaging`.`sender`
-VALUES
-(2,'2021-03-25 15:00:00')
-;
-INSERT INTO `messaging`.`receiver` 
-VALUES
-(2,'2021-03-24 15:00:00',1,1)
-;
-INSERT INTO `messaging`.`receiver` 
-VALUES
-(3,'2021-03-24 15:00:00',1,1)
-;
-INSERT INTO `messaging`.`receiver` 
-VALUES
-(4,'2021-03-24 15:00:00',1,1)
-;
-INSERT INTO `messaging`.`receiver` 
-VALUES
-(3,'2021-03-25 15:00:00',2,2)
-;
-INSERT INTO `messaging`.`receiver` 
-VALUES
-(1,'2021-03-25 15:00:00',2,2)
-;
 

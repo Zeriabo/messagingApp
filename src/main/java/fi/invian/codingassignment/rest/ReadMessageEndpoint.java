@@ -1,5 +1,8 @@
 package fi.invian.codingassignment.rest;
 
+import javax.crypto.Cipher;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.IvParameterSpec;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -9,17 +12,27 @@ import javax.ws.rs.core.MediaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import fi.invian.codingassignment.app.DatabaseConnection;
+import fi.invian.codingassignment.pojos.Encryption;
+import fi.invian.codingassignment.pojos.Message;
+import fi.invian.codingassignment.pojos.MessagesPojo;
 import fi.invian.codingassignment.pojos.ReceivePojo;
+
+import java.security.AlgorithmParameters;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
 import fi.invian.codingassignment.pojos.Response;
 
 @Path("/readmessage")
 
 public class ReadMessageEndpoint {
 
+	@SuppressWarnings({ "deprecation" })
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	@GET
@@ -29,9 +42,14 @@ public class ReadMessageEndpoint {
 		ObjectMapper mapper = new ObjectMapper();
 		ReceivePojo receive = mapper.readValue(email, ReceivePojo.class);
 		ArrayList<String> resultsArray = new ArrayList<String>();
-		String columnValue = "";
 		Response response = new Response();
-
+		MessagesPojo messages=new MessagesPojo();
+		
+		SecretKey secretKey=Encryption.generateKey(128);
+		Cipher ecipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+		ecipher.init(Cipher.ENCRYPT_MODE, secretKey);
+		AlgorithmParameters params = ecipher.getParameters();
+	 byte[] iv = params.getParameterSpec(IvParameterSpec.class).getIV();
 		try (Connection c = DatabaseConnection.getConnection()) {
 
 			PreparedStatement p1 = c.prepareStatement("SELECT * FROM users where email=?");
@@ -40,48 +58,56 @@ public class ReadMessageEndpoint {
 			r.first();
 			if (r.first()) {
 				int userId = r.getInt(1);
+				
+				 messages.setUserid(userId);
 				r.first();
 				if (userId > -1) {
 
-					PreparedStatement statement2 = c.prepareStatement("SELECT messaging.messages.messagebody\n"
-							+ "  FROM messaging.receiver, messaging.messages , messaging.users sender, messaging.users receivers\n"
-							+ "where messaging.receiver.messages_idmessages =  messaging.messages.idmessages\n"
-							+ "And sender.idusers= messaging.messages.idsender\n"
-							+ "And receivers.idusers=messaging.receiver.receiver_idusers\n"
-							+ "And messaging.receiver.receiver_idusers=?");
+					PreparedStatement statement2 = c.prepareStatement("SELECT messages.messagebody,messages.title,messages.datetime,messages.idsender "
+							+ "  FROM receiver, messages , users sender, users receivers "
+							+ "where receiver.messages_idmessages =  messages.idmessages\n"
+							+ "And sender.idusers=  messages.idsender\n"
+							+ "And receivers.idusers= receiver.users_idusers\n"
+							+ "And  receiver.users_idusers=?");
 
 					statement2.setInt(1, userId);
 
 					ResultSet rs = statement2.executeQuery();
 
 					while (rs.next()) {
-
-						
-						columnValue = rs.getString(1);
-						resultsArray.add("message: " + columnValue);
-						resultsArray.add(",");
+          String ms=Encryption.decrypt(ecipher.getAlgorithm(),rs.getString(1), secretKey, new IvParameterSpec(iv));
+						Message m = new Message();
+						m.setMessagebody(ms);
+						m.setDatetime((rs.getDate(3)));
+						m.setIdUser(rs.getInt(4));
+						m.setTitle(rs.getString(2));
+						System.out.println(m.toString());
+						messages.addMessage(m);
+					messages.getMessages().forEach((mess)->{System.out.print(mess);});
+					
 					}
 
 				}
 
 			} else {
-				response.setStatus(false);
-				response.setMessage("Wrong email");
+				response.setStatus(true);
+				response.setErrorMessage("no messages");
+		        response.setCode(444);
+		 
 			}
 		} catch (Exception e) {
-			System.out.println(e.getMessage());
-		}
-
-		if (resultsArray.size() > 0) {
-			response.setStatus(true);
-			resultsArray.forEach((mess) -> {
-				response.setMessage(response.getMessage() + " " + mess);
-			});
-
-		} else {
 			response.setStatus(false);
-			response.setMessage("didnt get Anything");
+			response.setErrorMessage(e.getMessage());
+			response.setCode(500);
+			
 		}
+
+		if (messages.getMessages().size() > 0) {
+			
+			response.setStatus(true);
+			response.setMessages(messages);
+
+		} 
 		return response;
 
 	}

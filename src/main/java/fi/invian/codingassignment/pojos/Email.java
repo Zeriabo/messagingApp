@@ -1,6 +1,8 @@
 package fi.invian.codingassignment.pojos;
 
 import java.util.Date;
+import java.util.List;
+
 
 public class Email {
 
@@ -40,9 +42,8 @@ public class Email {
 		return datetime;
 	}
 
-	@SuppressWarnings("deprecation")
-	public void setDatetime(String datetime) {
-		this.datetime = new Date(datetime);
+	public void setDatetime(Date datetime)  {
+	this.datetime=datetime;
 	}
 
 	public int getReceiptsnbr() {
@@ -53,16 +54,16 @@ public class Email {
 		this.receiptsnbr = receiptsnbr;
 	}
 
-	public String getReceivers() {
+	public List<String> getReceivers() {
 		return receivers;
 	}
 
-	public void setReceivers(String receivers) {
+	public void setReceivers(List<String> receivers) {
 		this.receivers = receivers;
 	}
 
 	public Email(int id, String senderId, String title, String messagebody, Date datetime, int receiptnbr,
-			String receivers) {
+			List<String> receivers) {
 		this.id = id;
 		this.senderId = senderId;
 		this.title = title;
@@ -83,6 +84,6 @@ public class Email {
 	private String messagebody;
 	private Date datetime;
 	private int receiptsnbr;
-	private String receivers;
+	private List<String> receivers;
 
 }

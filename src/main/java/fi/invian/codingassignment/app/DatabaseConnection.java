@@ -19,12 +19,12 @@ public class DatabaseConnection {
         if (dataSource == null) {
             HikariConfig config = new HikariConfig();
             config.setDriverClassName(Driver.class.getName());
-            config.setJdbcUrl("jdbc:mariadb://codingassignment-db/messaging");
+            config.setJdbcUrl("jdbc:mysql://localhost/messaging");
             config.setUsername("root");
-             config.setPassword("root_password");
+             config.setPassword("rootroot");
             config.setPoolName("pool-1");
             config.setMaximumPoolSize(1);
-
+            config.setMaxLifetime(300000); 
             config.setLeakDetectionThreshold(5000);
             config.setConnectionTimeout(1000);
 
