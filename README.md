@@ -28,3 +28,5 @@ A secured messaging application RESTful web service created by java 8  where the
 also the program provides top 10 users (by sent message count) sorted by decreasing sent message count for the last 30 days
 
 please feel free to see the app on the master branch.
+
+Remark: the code is updated frequently.
