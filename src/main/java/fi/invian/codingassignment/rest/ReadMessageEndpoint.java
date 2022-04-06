@@ -1,27 +1,18 @@
 package fi.invian.codingassignment.rest;
 
 import javax.crypto.BadPaddingException;
-import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
-import javax.crypto.SecretKey;
-import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.SecretKeySpec;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import fi.invian.codingassignment.app.DatabaseConnection;
-import fi.invian.codingassignment.pojos.Encryption;
 import fi.invian.codingassignment.pojos.Message;
 import fi.invian.codingassignment.pojos.MessagesPojo;
 import fi.invian.codingassignment.pojos.ReceivePojo;
-
-import java.security.AlgorithmParameters;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.KeyFactory;
@@ -36,11 +27,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
 import fi.invian.codingassignment.pojos.Response;
 import fi.invian.codingassignment.security.RSAUtil;
 
@@ -48,7 +34,6 @@ import fi.invian.codingassignment.security.RSAUtil;
 
 public class ReadMessageEndpoint {
 
-	@SuppressWarnings({ "deprecation" })
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	@GET
@@ -57,11 +42,9 @@ public class ReadMessageEndpoint {
 
 		ObjectMapper mapper = new ObjectMapper();
 		ReceivePojo receive = mapper.readValue(email, ReceivePojo.class);
-		ArrayList<String> resultsArray = new ArrayList<String>();
+
 		Response response = new Response();
-		MessagesPojo messages=new MessagesPojo();
-		
-	
+		MessagesPojo messages = new MessagesPojo();
 
 		try (Connection c = DatabaseConnection.getConnection()) {
 
@@ -71,75 +54,80 @@ public class ReadMessageEndpoint {
 			r.first();
 			if (r.first()) {
 				int userId = r.getInt(1);
-				
-				 messages.setUserid(userId);
+
+				messages.setUserid(userId);
 				r.first();
 				if (userId > -1) {
 
-					PreparedStatement statement2 = c.prepareStatement("SELECT messages.idmessages,messages.messagebody,messages.title,messages.datetime,messages.idsender "
-							+ "  FROM receiver, messages , users sender, users receivers "
-							+ "where receiver.messages_idmessages =  messages.idmessages\n"
-							+ "And sender.idusers=  messages.idsender\n"
-							+ "And receivers.idusers= receiver.users_idusers\n"
-							+ "And  receiver.users_idusers=?");
+					PreparedStatement statement2 = c.prepareStatement(
+							"SELECT messages.idmessages,messages.messagebody,messages.title,messages.datetime,messages.idsender "
+									+ "  FROM receiver, messages , users sender, users receivers "
+									+ "where receiver.messages_idmessages =  messages.idmessages\n"
+									+ "And sender.idusers=  messages.idsender\n"
+									+ "And receivers.idusers= receiver.users_idusers\n"
+									+ "And  receiver.users_idusers=?");
 
 					statement2.setInt(1, userId);
 
 					ResultSet rs = statement2.executeQuery();
-					rs.first();
-					PreparedStatement statementsecret = c.prepareStatement(
-							"SELECT * FROM messaging.secret_keys\n"
-							+ "where messages_idmessages=?;"
-							+ "",
-							Statement.RETURN_GENERATED_KEYS);
-					
-					statementsecret.setInt(1,rs.getInt(1));
-					ResultSet res = statementsecret.executeQuery();
-					res.first();
-					byte[] privateKey = res.getBytes(2);
-					
-          //String ms=Encryption.decrypt(ecipher.getAlgorithm(),rs.getString(1), secretKey, new IvParameterSpec(iv));
+
+					while (rs.next()) {
+
+						PreparedStatement statementsecret = c.prepareStatement(
+								"SELECT * FROM messaging.secret_keys\n" + "where messages_idmessages=?;" + "",
+								Statement.RETURN_GENERATED_KEYS);
+
+						statementsecret.setInt(1, rs.getInt(1));
+						ResultSet res = statementsecret.executeQuery();
+
+						res.first();
+						byte[] privateKey = res.getBytes(2);
+
 						Message m = new Message();
-						m.setMessagebody(getMessageDecrypted(rs.getBytes(2),privateKey));
+						m.setMessagebody(getMessageDecrypted(rs.getBytes(2), privateKey));
 						m.setDatetime((rs.getDate(4)));
 						m.setIdUser(rs.getInt(5));
 						m.setTitle(rs.getString(3));
 						System.out.println(m.toString());
 						messages.addMessage(m);
-					messages.getMessages().forEach((mess)->{System.out.print(mess);});
-					
-					
+						messages.getMessages().forEach((mess) -> {
+							System.out.print(mess);
+						});
+					}
 
 				}
 
 			} else {
 				response.setStatus(true);
 				response.setErrorMessage("no messages");
-		        response.setCode(444);
-		 
+				response.setCode(444);
+
 			}
 		} catch (Exception e) {
 			response.setStatus(false);
 			response.setErrorMessage(e.getMessage());
 			response.setCode(500);
-			
+
 		}
 
 		if (messages.getMessages().size() > 0) {
-			
+
 			response.setStatus(true);
 			response.setMessages(messages);
 
-		} 
+		}
 		return response;
 	}
 
-	private String getMessageDecrypted(byte[] message,byte[] privateKeyBytes) throws SQLException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidParameterSpecException, InvalidAlgorithmParameterException, BadPaddingException, IllegalBlockSizeException, InvalidKeySpecException {
+	private String getMessageDecrypted(byte[] message, byte[] privateKeyBytes)
+			throws SQLException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException,
+			InvalidParameterSpecException, InvalidAlgorithmParameterException, BadPaddingException,
+			IllegalBlockSizeException, InvalidKeySpecException {
 		KeyFactory keyFactory = KeyFactory.getInstance("RSA");
-		 EncodedKeySpec privateKeySpec = new PKCS8EncodedKeySpec(privateKeyBytes);
-		    PrivateKey privateKey2 = keyFactory.generatePrivate(privateKeySpec);
-		String ms=	RSAUtil.decrypt(message,privateKey2);
-		
+		EncodedKeySpec privateKeySpec = new PKCS8EncodedKeySpec(privateKeyBytes);
+		PrivateKey privateKey2 = keyFactory.generatePrivate(privateKeySpec);
+		String ms = RSAUtil.decrypt(message, privateKey2);
+
 		return ms;
 	}
 }

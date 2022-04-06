@@ -1,9 +1,5 @@
 package fi.invian.codingassignment.rest;
 
-import javax.crypto.Cipher;
-import javax.crypto.KeyGenerator;
-import javax.crypto.SecretKey;
-import javax.crypto.spec.IvParameterSpec;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -23,8 +19,6 @@ import fi.invian.codingassignment.security.RSAUtil;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.security.AlgorithmParameters;
-import java.security.KeyPair;
 import java.security.PublicKey;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -81,21 +75,14 @@ public class SendMessageEndpoint {
 						java.sql.Timestamp datetime=  new java.sql.Timestamp(email.getDatetime().getTime());
 						Message message = new Message(email.getId(), email.getTitle(), email.getMessagebody(),
 								datetime , senderId);
-						
-					
-						
+		
 						RSAKeyPairGenerator	rSAKeyPairGenerator = new RSAKeyPairGenerator();
 						
 						PublicKey publicKey	=rSAKeyPairGenerator.getPublicKey();
-						
-					//	PublicKey pb=RSAUtil.getPublicKey("RSA", messageId, senderId);
-						
-						
+			
 						byte[] encryptedMessage=RSAUtil.encrypt(message.getMessagebody(),publicKey);
 						
-					
-						//String s=	RSAUtil.decrypt(encryptedMessage,RSAUtil.getPrivateKey(RSAUtil.getPrivate()));
-					
+				
 						messages.addMessage(message);
 						PreparedStatement statement = c.prepareStatement(
 								"INSERT INTO messages(`title`, `messagebody`, `datetime`, `nbrofrecipients`, `idsender`) VALUES(?,?,?,?,?)",
