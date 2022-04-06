@@ -1,6 +1,7 @@
 package fi.invian.codingassignment.rest;
 
 import javax.crypto.Cipher;
+import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import javax.ws.rs.Consumes;
@@ -16,10 +17,15 @@ import fi.invian.codingassignment.pojos.Message;
 import fi.invian.codingassignment.pojos.MessagesPojo;
 import fi.invian.codingassignment.pojos.Receiver;
 import fi.invian.codingassignment.pojos.Sender;
+import fi.invian.codingassignment.security.CryptoUtil;
+import fi.invian.codingassignment.security.RSAKeyPairGenerator;
+import fi.invian.codingassignment.security.RSAUtil;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.security.AlgorithmParameters;
+import java.security.KeyPair;
+import java.security.PublicKey;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -57,6 +63,7 @@ public class SendMessageEndpoint {
 		java.io.FileInputStream fis = new FileInputStream(path);
 		 java.io.FileOutputStream fos = null;
 		 fos = new java.io.FileOutputStream(passwords);
+		 CryptoUtil cryptoUtil=new CryptoUtil();
 		 
 		MessagesPojo messages=new MessagesPojo(senderId,messagesList);
 		if (receiversArray.size()<= 5) {
@@ -75,21 +82,27 @@ public class SendMessageEndpoint {
 						Message message = new Message(email.getId(), email.getTitle(), email.getMessagebody(),
 								datetime , senderId);
 						
-						SecretKey secretKey=Encryption.generateKey(128);
-						Cipher ecipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
-						ecipher.init(Cipher.ENCRYPT_MODE, secretKey);
-						AlgorithmParameters params = ecipher.getParameters();
-					 byte[] iv = params.getParameterSpec(IvParameterSpec.class).getIV();
+					
 						
-					String encryptedMessage=Encryption.encrypt(ecipher.getAlgorithm(), email.getMessagebody(), secretKey, new IvParameterSpec(iv));
-						message.setMessagebody(encryptedMessage);
+						RSAKeyPairGenerator	rSAKeyPairGenerator = new RSAKeyPairGenerator();
+						
+						PublicKey publicKey	=rSAKeyPairGenerator.getPublicKey();
+						
+					//	PublicKey pb=RSAUtil.getPublicKey("RSA", messageId, senderId);
+						
+						
+						byte[] encryptedMessage=RSAUtil.encrypt(message.getMessagebody(),publicKey);
+						
+					
+						//String s=	RSAUtil.decrypt(encryptedMessage,RSAUtil.getPrivateKey(RSAUtil.getPrivate()));
+					
 						messages.addMessage(message);
 						PreparedStatement statement = c.prepareStatement(
 								"INSERT INTO messages(`title`, `messagebody`, `datetime`, `nbrofrecipients`, `idsender`) VALUES(?,?,?,?,?)",
 								Statement.RETURN_GENERATED_KEYS);
 				
 						statement.setString(1, message.getTitle());
-						statement.setString(2, message.getMessagebody());
+						statement.setBytes(2, encryptedMessage);
 						statement.setTimestamp(3,datetime);
 						statement.setInt(4, receiversArray.size());
 						statement.setInt(5, senderId);
@@ -109,8 +122,8 @@ public class SendMessageEndpoint {
 								+ "(?,?,?);"
 								+ "",
 								Statement.RETURN_GENERATED_KEYS);
-						byte[] key  = secretKey.getEncoded();
-						statementsecret.setBytes(1,key);
+						
+						statementsecret.setBytes(1,rSAKeyPairGenerator.getPrivateKey().getEncoded());
 						statementsecret.setInt(2,messageId);
 						statementsecret.setInt(3, senderId);
 						
@@ -119,11 +132,11 @@ public class SendMessageEndpoint {
 						PreparedStatement s1 = c.prepareStatement("SELECT * FROM users where idusers=?");
 						s1.setInt(1, senderId);
 
-						ResultSet s = s1.executeQuery();
-						s.first();
+						ResultSet rsusers = s1.executeQuery();
+						rsusers.first();
 
-						Sender sender = new Sender(s.getInt(1), s.getString(2), s.getString(3));
-						s.first();
+						Sender sender = new Sender(rsusers.getInt(1), rsusers.getString(2), rsusers.getString(3));
+						rsusers.first();
 
 						PreparedStatement ins1 = c
 								.prepareStatement("INSERT INTO sender(`users_idusers`, `datetime`) VALUES(?,?) ");
