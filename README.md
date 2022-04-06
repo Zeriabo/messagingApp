@@ -30,3 +30,4 @@ also the program provides top 10 users (by sent message count) sorted by decreas
 please feel free to see the app on the master branch.
 
 Remark: the code is updated frequently.
+Coming: making second backup for the keys in a coded file on the server
