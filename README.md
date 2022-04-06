@@ -30,7 +30,7 @@ Note that it is not possible to run the REST server outside of Docker.
 ## REST server
 Java remote debug port is at `localhost:5005`
 
-Logs can be read with `docker logs codingassignment`
+Logs can be read with `docker logs `
 
 ## MariaDB database
-Logs can be read with `docker logs codingassignment-db`
+Logs can be read with `docker logs messaging-db`
