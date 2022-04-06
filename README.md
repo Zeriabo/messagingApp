@@ -6,7 +6,7 @@ JAVA 8,
 Maven,
 MYSQL,
 docker,
-Jetty server
+Jersy server
 
 Database design:
 ![This is an image](/../master/assets/images/database.png)
