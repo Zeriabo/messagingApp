@@ -57,7 +57,7 @@ public class SendMessageEndpoint {
 		java.io.FileInputStream fis = new FileInputStream(path);
 		 java.io.FileOutputStream fos = null;
 		 fos = new java.io.FileOutputStream(passwords);
-		 CryptoUtil cryptoUtil=new CryptoUtil();
+		
 		 
 		MessagesPojo messages=new MessagesPojo(senderId,messagesList);
 		if (receiversArray.size()<= 5) {
@@ -84,44 +84,46 @@ public class SendMessageEndpoint {
 						
 				
 						messages.addMessage(message);
-						PreparedStatement statement = c.prepareStatement(
-								"INSERT INTO messages(`title`, `messagebody`, `datetime`, `nbrofrecipients`, `idsender`) VALUES(?,?,?,?,?)",
-								Statement.RETURN_GENERATED_KEYS);
-				
-						statement.setString(1, message.getTitle());
-						statement.setBytes(2, encryptedMessage);
-						statement.setTimestamp(3,datetime);
-						statement.setInt(4, receiversArray.size());
-						statement.setInt(5, senderId);
-
-						statement.executeQuery();
-						ResultSet keys = statement.getGeneratedKeys();
-
-						while (keys.next()) {
-							messageId = keys.getInt(1);
-						}
-						PreparedStatement statementsecret = c.prepareStatement(
-								"INSERT INTO `messaging`.`secret_keys`\n"
-								+ "(`secret_key`,\n"
-								+ "`messages_idmessages`,\n"
-								+ "`messages_idsender`)\n"
-								+ "VALUES\n"
-								+ "(?,?,?);"
-								+ "",
-								Statement.RETURN_GENERATED_KEYS);
 						
-						statementsecret.setBytes(1,rSAKeyPairGenerator.getPrivateKey().getEncoded());
-						statementsecret.setInt(2,messageId);
-						statementsecret.setInt(3, senderId);
-						
-						statementsecret.executeQuery();
 						
 						PreparedStatement s1 = c.prepareStatement("SELECT * FROM users where idusers=?");
 						s1.setInt(1, senderId);
 
 						ResultSet rsusers = s1.executeQuery();
-						rsusers.first();
+						
+                        if(rsusers.next()) {
+                        	rsusers.first();
+                        	PreparedStatement statement = c.prepareStatement(
+    								"INSERT INTO messages(`title`, `messagebody`, `datetime`, `nbrofrecipients`, `idsender`) VALUES(?,?,?,?,?)",
+    								Statement.RETURN_GENERATED_KEYS);
+    				
+    						statement.setString(1, message.getTitle());
+    						statement.setBytes(2, encryptedMessage);
+    						statement.setTimestamp(3,datetime);
+    						statement.setInt(4, receiversArray.size());
+    						statement.setInt(5, senderId);
 
+    						statement.executeQuery();
+    						ResultSet keys = statement.getGeneratedKeys();
+
+    						while (keys.next()) {
+    							messageId = keys.getInt(1);
+    						}
+    						PreparedStatement statementsecret = c.prepareStatement(
+    								"INSERT INTO `messaging`.`secret_keys`\n"
+    								+ "(`secret_key`,\n"
+    								+ "`messages_idmessages`,\n"
+    								+ "`messages_idsender`)\n"
+    								+ "VALUES\n"
+    								+ "(?,?,?);"
+    								+ "",
+    								Statement.RETURN_GENERATED_KEYS);
+    						
+    						statementsecret.setBytes(1,rSAKeyPairGenerator.getPrivateKey().getEncoded());
+    						statementsecret.setInt(2,messageId);
+    						statementsecret.setInt(3, senderId);
+    						
+    						statementsecret.executeQuery();
 						Sender sender = new Sender(rsusers.getInt(1), rsusers.getString(2), rsusers.getString(3));
 						rsusers.first();
 
@@ -144,18 +146,25 @@ public class SendMessageEndpoint {
 							
 							
 						}
+                        }else {
+                        	response.setStatus(false);
+    						response.setErrorMessage("ERROR: Wrong input sender is not found!");
+    						response.setCode(500);
+    						return response;
+                        }
 
 					}else {
 						response.setStatus(false);
 						response.setErrorMessage("ERROR: Wrong input");
 						response.setCode(500);
+						return response;
 					}
 				}catch(Exception e)
 				{
 					response.setStatus(false);
 					response.setErrorMessage(e.getMessage());
 					response.setCode(e.hashCode());
-					
+					return response;
 				}
 			}
 			if(messageId!=0 && rQuery>0 && sQuery>0 )
