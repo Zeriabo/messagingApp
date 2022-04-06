@@ -1,4 +1,4 @@
-package fi.invian;
+package fi.messaging;
 
 import static org.junit.Assert.assertTrue;
 
