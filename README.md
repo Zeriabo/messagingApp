@@ -3,4 +3,4 @@
 
 Database design:
 
-/../master/assets/images/electrocat.png
+/../master/assets/images/database.png
