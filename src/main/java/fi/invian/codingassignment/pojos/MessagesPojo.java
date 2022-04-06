@@ -1,0 +1,47 @@
+package fi.invian.codingassignment.pojos;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class MessagesPojo {
+
+	private int userid;
+	private ArrayList<Message> messages= new ArrayList<Message>();
+
+
+	public MessagesPojo(int userid, ArrayList<Message>  messages) {
+
+		this.setUserid(userid);
+		this.setMessages(messages);
+	}
+
+
+	public MessagesPojo() {
+	
+	}
+
+
+	public int getUserid() {
+		return userid;
+	}
+
+
+	public void setUserid(int userid) {
+		this.userid = userid;
+	}
+
+
+	public ArrayList<Message> getMessages() {
+		return messages;
+	}
+
+
+	public void setMessages(ArrayList<Message> messages) {
+		this.messages = messages;
+	}
+
+	public void addMessage(Message m) {
+		this.messages.add(m);
+	}
+
+}
