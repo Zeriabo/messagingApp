@@ -1,2 +1,6 @@
 # messagingApp
-Java messaging App
+## Java messaging App
+
+Database design:
+
+/../master/assets/images/electrocat.png
