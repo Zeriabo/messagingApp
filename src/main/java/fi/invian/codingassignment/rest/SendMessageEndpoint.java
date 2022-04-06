@@ -8,17 +8,13 @@ import javax.ws.rs.core.MediaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fi.invian.codingassignment.app.DatabaseConnection;
 import fi.invian.codingassignment.pojos.Email;
-import fi.invian.codingassignment.pojos.Encryption;
 import fi.invian.codingassignment.pojos.Message;
 import fi.invian.codingassignment.pojos.MessagesPojo;
 import fi.invian.codingassignment.pojos.Receiver;
 import fi.invian.codingassignment.pojos.Sender;
-import fi.invian.codingassignment.security.CryptoUtil;
 import fi.invian.codingassignment.security.RSAKeyPairGenerator;
 import fi.invian.codingassignment.security.RSAUtil;
-
 import java.io.File;
-import java.io.FileInputStream;
 import java.security.PublicKey;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -33,7 +29,6 @@ import fi.invian.codingassignment.pojos.Response;
 public class SendMessageEndpoint {
 	int row = 0;
 
-	@SuppressWarnings("resource")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	@POST
@@ -42,7 +37,6 @@ public class SendMessageEndpoint {
 
 		ObjectMapper mapper = new ObjectMapper();
 		Email email = mapper.readValue(messageDetails, Email.class);
-		Encryption enc = new Encryption();
 		int messageId = -1;
 		int sQuery=0;
 		int rQuery=0;
@@ -54,11 +48,7 @@ public class SendMessageEndpoint {
 		File passwords=new File(path);
 		passwords.getParentFile().mkdirs(); // Will create parent directories if not exists
 		passwords.createNewFile();
-		java.io.FileInputStream fis = new FileInputStream(path);
-		 java.io.FileOutputStream fos = null;
-		 fos = new java.io.FileOutputStream(passwords);
-		
-		 
+			 
 		MessagesPojo messages=new MessagesPojo(senderId,messagesList);
 		if (receiversArray.size()<= 5) {
 

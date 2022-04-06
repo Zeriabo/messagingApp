@@ -1,7 +1,6 @@
 package fi.invian.codingassignment.pojos;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class MessagesPojo {
 

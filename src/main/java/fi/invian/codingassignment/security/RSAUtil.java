@@ -4,12 +4,9 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
-
 import fi.invian.codingassignment.app.DatabaseConnection;
-
 import java.security.*;
 import java.security.spec.InvalidKeySpecException;
-import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -18,7 +15,6 @@ import java.sql.Statement;
 import java.util.Base64;
 
 public class RSAUtil {
-
 
 
     public static PublicKey getPublicKey(String base64PublicKeym,int messageid,int senderid) throws SQLException{
