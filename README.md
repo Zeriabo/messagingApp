@@ -3,6 +3,7 @@
 
 Program:
 JAVA 8,
+Maven,
 MYSQL,
 docker,
 Jetty server
