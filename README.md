@@ -26,3 +26,5 @@ Also the message body is inserted encoded in the database as an array of bytes.
 
 A secured messaging application RESTful web service created by java 8  where the users the system can send encoded messages to each other and only the recipient can read the message by a key given to him. The messages are encoded with the public also the private key is generated for each message then inserted into the database encoded with the message id and the sender id. Also message body is inserted as encoded inside the database, when each user wants to read the messages the messages are retrieved from database and decoded by the private key then they are given to the user.
 also the program provides top 10 users (by sent message count) sorted by decreasing sent message count for the last 30 days
+
+please feel free to see the app on the master branch.
