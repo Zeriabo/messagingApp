@@ -19,7 +19,7 @@ public class DatabaseConnection {
         if (dataSource == null) {
             HikariConfig config = new HikariConfig();
             config.setDriverClassName(Driver.class.getName());
-            config.setJdbcUrl("jdbc:mysql://localhost/messaging");
+            config.setJdbcUrl("jdbc:mariadb://localhost:3306/messaging");
             config.setUsername("root");
              config.setPassword("root_password");
             config.setPoolName("pool-1");

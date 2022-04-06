@@ -22,7 +22,7 @@ ENGINE = InnoDB;
 CREATE TABLE IF NOT EXISTS `messaging`.`messages` (
   `idmessages` INT NOT NULL AUTO_INCREMENT,
   `title` VARCHAR(45) NOT NULL,
-  `messagebody` VARCHAR(45) NOT NULL,
+  `messagebody` BLOB NOT NULL,
   `datetime` VARCHAR(45) NOT NULL,
   `nbrofrecipients` INT NOT NULL,
   `idsender` INT NOT NULL,
@@ -96,14 +96,14 @@ SET SQL_MODE=@OLD_SQL_MODE;
 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
 
-
-INSERT INTO `messaging`.`users`(name,email,password) 
+INSERT INTO `messaging`.`users`(name,email) 
 VALUES
-('Zeriab','zeriab@hotmail.com','12345'),
-('Zeriab2','zeriab2@hotmail.com','12345'),
-('Zeriab3','zeriab3@hotmail.com','12345'),
-('Zeriab4','zeriab4@hotmail.com','12345')
+('Zeriab','zeriab@hotmail.com'),
+('Zeriab2','zeriab2@hotmail.com'),
+('Zeriab3','zeriab3@hotmail.com'),
+('Zeriab4','zeriab4@hotmail.com')
 ;
+
 
 
 

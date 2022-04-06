@@ -45,7 +45,7 @@ public class SendMessageEndpoint {
 		Response response = new Response();
 		int senderId = Integer.parseInt(email.getSenderId());
 		List<String> receiversArray = email.getReceivers();
-		String path = "/Users/zeriab/Desktop/codingassignment/secrets/secret";
+		String path = "./secrets/secret";
 		File passwords=new File(path);
 		passwords.getParentFile().mkdirs(); // Will create parent directories if not exists
 		passwords.createNewFile();
