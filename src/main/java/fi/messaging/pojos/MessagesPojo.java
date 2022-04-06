@@ -1,4 +1,4 @@
-package fi.invian.codingassignment.pojos;
+package fi.messaging.pojos;
 
 import java.util.ArrayList;
 

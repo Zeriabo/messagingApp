@@ -1,4 +1,4 @@
-package fi.invian.codingassignment.app;
+package fi.messaging.app;
 
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
@@ -18,7 +18,7 @@ public class BackendApplication {
         ServletContextHandler context = new ServletContextHandler(ServletContextHandler.NO_SESSIONS);
         context.setContextPath("/*");
         ServletContainer jersey = new ServletContainer(new ResourceConfig() {{
-            packages("fi.invian.codingassignment.rest");
+            packages("fi.messaging.rest");
         }});
         ServletHolder holder = new ServletHolder(jersey);
         context.addServlet(holder, "/*");

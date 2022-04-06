@@ -1,4 +1,4 @@
-package fi.invian.codingassignment.app;
+package fi.messaging.app;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;

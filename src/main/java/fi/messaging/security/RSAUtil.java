@@ -1,10 +1,12 @@
-package fi.invian.codingassignment.security;
+package fi.messaging.security;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
-import fi.invian.codingassignment.app.DatabaseConnection;
+
+import fi.messaging.app.DatabaseConnection;
+
 import java.security.*;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;

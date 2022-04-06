@@ -1,4 +1,4 @@
-package fi.invian.codingassignment.rest;
+package fi.messaging.rest;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
@@ -9,10 +9,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import fi.invian.codingassignment.app.DatabaseConnection;
-import fi.invian.codingassignment.pojos.Message;
-import fi.invian.codingassignment.pojos.MessagesPojo;
-import fi.invian.codingassignment.pojos.ReceivePojo;
+
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.KeyFactory;
@@ -27,8 +24,13 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import fi.invian.codingassignment.pojos.Response;
-import fi.invian.codingassignment.security.RSAUtil;
+
+import fi.messaging.app.DatabaseConnection;
+import fi.messaging.pojos.Message;
+import fi.messaging.pojos.MessagesPojo;
+import fi.messaging.pojos.ReceivePojo;
+import fi.messaging.pojos.Response;
+import fi.messaging.security.RSAUtil;
 
 @Path("/readmessage")
 

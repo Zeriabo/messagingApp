@@ -1,4 +1,4 @@
-package fi.invian.codingassignment.rest;
+package fi.messaging.rest;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
@@ -6,14 +6,17 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import fi.invian.codingassignment.app.DatabaseConnection;
-import fi.invian.codingassignment.pojos.Email;
-import fi.invian.codingassignment.pojos.Message;
-import fi.invian.codingassignment.pojos.MessagesPojo;
-import fi.invian.codingassignment.pojos.Receiver;
-import fi.invian.codingassignment.pojos.Sender;
-import fi.invian.codingassignment.security.RSAKeyPairGenerator;
-import fi.invian.codingassignment.security.RSAUtil;
+
+import fi.messaging.app.DatabaseConnection;
+import fi.messaging.pojos.Email;
+import fi.messaging.pojos.Message;
+import fi.messaging.pojos.MessagesPojo;
+import fi.messaging.pojos.Receiver;
+import fi.messaging.pojos.Response;
+import fi.messaging.pojos.Sender;
+import fi.messaging.security.RSAKeyPairGenerator;
+import fi.messaging.security.RSAUtil;
+
 import java.io.File;
 import java.security.PublicKey;
 import java.sql.Connection;
@@ -22,8 +25,6 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
-
-import fi.invian.codingassignment.pojos.Response;
 
 @Path("/sendmessage")
 public class SendMessageEndpoint {

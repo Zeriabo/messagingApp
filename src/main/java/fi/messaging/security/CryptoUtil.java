@@ -1,4 +1,4 @@
-package fi.invian.codingassignment.security;
+package fi.messaging.security;
 
 import java.security.KeyFactory;
 import java.security.KeyPair;

@@ -1,4 +1,4 @@
-package fi.invian.codingassignment.security;
+package fi.messaging.security;
 
 import java.io.File;
 import java.io.FileOutputStream;

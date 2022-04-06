@@ -1,4 +1,4 @@
-package fi.invian.codingassignment.pojos;
+package fi.messaging.pojos;
 
 public class Sender extends User {
 
