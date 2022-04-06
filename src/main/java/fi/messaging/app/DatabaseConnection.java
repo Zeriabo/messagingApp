@@ -21,7 +21,7 @@ public class DatabaseConnection {
             config.setDriverClassName(Driver.class.getName());
             config.setJdbcUrl("jdbc:mysql://localhost/messaging");
             config.setUsername("root");
-             config.setPassword("rootroot");
+             config.setPassword("root_password");
             config.setPoolName("pool-1");
             config.setMaximumPoolSize(1);
             config.setMaxLifetime(300000); 
