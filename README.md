@@ -30,5 +30,5 @@ also the program provides top 10 users (by sent message count) sorted by decreas
 please feel free to see the app on the master branch.
 
 Remark: the code is on a regular updates.
-Coming update: making second backup for the keys in a coded file on the server \n
+Coming update: making second backup for the keys in a coded file on the server 
 Coming update: creating a react app which interact with the java backend
