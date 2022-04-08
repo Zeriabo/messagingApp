@@ -45,9 +45,7 @@ public class ReadMessageFromSenderEndpoint {
 	
 	public Response readMessage(@QueryParam("receiverEmail") String receiverEmail,@QueryParam("senderEmail") String senderEmail) throws Exception {
 
-		ObjectMapper mapper = new ObjectMapper();
-//		ReceivePojo receive = mapper.readValue(receiverEmail, ReceivePojo.class);
-//		Sender sender = mapper.readValue(senderEmail, Sender.class);
+
 		Response response = new Response();
 		MessagesPojo messages = new MessagesPojo();
 

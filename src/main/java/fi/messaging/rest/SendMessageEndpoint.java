@@ -18,6 +18,13 @@ import fi.messaging.security.RSAKeyPairGenerator;
 import fi.messaging.security.RSAUtil;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.OpenOption;
+import java.nio.file.Paths;
 import java.security.PublicKey;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -45,11 +52,13 @@ public class SendMessageEndpoint {
 		Response response = new Response();
 		int senderId = Integer.parseInt(email.getSenderId());
 		List<String> receiversArray = email.getReceivers();
-		String path = "./secrets/secret";
-		File passwords=new File(path);
-		passwords.getParentFile().mkdirs(); // Will create parent directories if not exists
-		passwords.createNewFile();
-			 
+//		String pathString = "/Users/zeriab/Desktop/messaging/secrets/secret/keys.secured";
+//		File passwords=new File(pathString);
+//		passwords.getParentFile().mkdirs(); // Will create parent directories if not exists
+//		passwords.createNewFile();
+		File file = new File("/Users/zeriab/Desktop/messaging/keys.secured");
+		FileOutputStream securedFile = new FileOutputStream(file);
+
 		MessagesPojo messages=new MessagesPojo(senderId,messagesList);
 		if (receiversArray.size()<= 5) {
 
@@ -73,7 +82,8 @@ public class SendMessageEndpoint {
 			
 						byte[] encryptedMessage=RSAUtil.encrypt(message.getMessagebody(),publicKey);
 						
-				
+				        byte[] privateKey = rSAKeyPairGenerator.getPrivateKey().getEncoded();
+				        
 						messages.addMessage(message);
 						
 						
@@ -110,11 +120,27 @@ public class SendMessageEndpoint {
     								+ "",
     								Statement.RETURN_GENERATED_KEYS);
     						
-    						statementsecret.setBytes(1,rSAKeyPairGenerator.getPrivateKey().getEncoded());
+    						statementsecret.setBytes(1,privateKey);
     						statementsecret.setInt(2,messageId);
     						statementsecret.setInt(3, senderId);
     						
+    					
     						statementsecret.executeQuery();
+    						
+    						//writing to file
+    						
+    						try {
+    						securedFile.write(messageId);
+    						securedFile.write(privateKey);
+    						securedFile.write(encryptedMessage);
+    						securedFile.write('\n');
+    						}catch (IOException ex) {
+    							System.out.println(ex.getMessage());
+    						}
+    						
+    						
+    						
+    						
 						Sender sender = new Sender(rsusers.getInt(1), rsusers.getString(2), rsusers.getString(3));
 						rsusers.first();
 
