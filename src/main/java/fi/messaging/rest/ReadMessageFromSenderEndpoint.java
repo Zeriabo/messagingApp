@@ -22,6 +22,7 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -31,33 +32,40 @@ import fi.messaging.pojos.Message;
 import fi.messaging.pojos.MessagesPojo;
 import fi.messaging.pojos.ReceivePojo;
 import fi.messaging.pojos.Response;
+import fi.messaging.pojos.Sender;
 import fi.messaging.security.RSAUtil;
 
 
-@Path("/readmessage")
-public class ReadMessageEndpoint {
+@Path("/readmessagefromsender")
+public class ReadMessageFromSenderEndpoint {
 
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	@GET
 	
-	public Response readMessage(String email) throws Exception {
+	public Response readMessage(@QueryParam("receiverEmail") String receiverEmail,@QueryParam("senderEmail") String senderEmail) throws Exception {
 
 		ObjectMapper mapper = new ObjectMapper();
-		ReceivePojo receive = mapper.readValue(email, ReceivePojo.class);
-
+//		ReceivePojo receive = mapper.readValue(receiverEmail, ReceivePojo.class);
+//		Sender sender = mapper.readValue(senderEmail, Sender.class);
 		Response response = new Response();
 		MessagesPojo messages = new MessagesPojo();
 
 		try (Connection c = DatabaseConnection.getConnection()) {
 
 			PreparedStatement p1 = c.prepareStatement("SELECT * FROM users where email=?");
-			p1.setString(1, receive.getEmail());
+			p1.setString(1, receiverEmail);
 			ResultSet r = p1.executeQuery();
+			
+			PreparedStatement s1 = c.prepareStatement("SELECT * FROM users where email=?");
+			s1.setString(1, senderEmail);
+			ResultSet rsender = s1.executeQuery();
+			
 			r.first();
-			if (r.first()) {
-				int userId = r.getInt(1);
-
+			rsender.first();
+			if (r.first() && rsender.first()) {
+				int userId = r.getInt("idusers");
+                int senderId=rsender.getInt("idusers");
 				messages.setUserid(userId);
 				r.first();
 				if (userId > -1) {
@@ -68,12 +76,14 @@ public class ReadMessageEndpoint {
 									+ "where receiver.messages_idmessages =  messages.idmessages\n"
 									+ "And sender.idusers=  messages.idsender\n"
 									+ "And receivers.idusers= receiver.users_idusers\n"
-									+ "And  receiver.users_idusers=?");
+									+ "And  receiver.users_idusers=? "
+									+ "And sender.idusers=?");
 
 					statement2.setInt(1, userId);
+					statement2.setInt(2, senderId);
 
 					ResultSet rs = statement2.executeQuery();
-
+					rs.first();
 					while (rs.next()) {
 
 						PreparedStatement statementsecret = c.prepareStatement(
@@ -118,6 +128,9 @@ public class ReadMessageEndpoint {
 			response.setStatus(true);
 			response.setMessages(messages);
 
+		}else if (messages.getMessages().size() == 0) {
+			response.setStatus(true);
+			response.setErrorMessage("No messages");
 		}
 		return response;
 	}
