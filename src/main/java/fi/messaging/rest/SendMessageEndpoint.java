@@ -16,15 +16,9 @@ import fi.messaging.pojos.Response;
 import fi.messaging.pojos.Sender;
 import fi.messaging.security.RSAKeyPairGenerator;
 import fi.messaging.security.RSAUtil;
-
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.OpenOption;
-import java.nio.file.Paths;
 import java.security.PublicKey;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -32,7 +26,10 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
-
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 @Path("/sendmessage")
 public class SendMessageEndpoint {
 	int row = 0;
@@ -52,13 +49,19 @@ public class SendMessageEndpoint {
 		Response response = new Response();
 		int senderId = Integer.parseInt(email.getSenderId());
 		List<String> receiversArray = email.getReceivers();
-//		String pathString = "/Users/zeriab/Desktop/messaging/secrets/secret/keys.secured";
-//		File passwords=new File(pathString);
-//		passwords.getParentFile().mkdirs(); // Will create parent directories if not exists
-//		passwords.createNewFile();
 		File file = new File("/Users/zeriab/Desktop/messaging/keys.secured");
+		@SuppressWarnings("resource")
 		FileOutputStream securedFile = new FileOutputStream(file);
-
+		XSSFWorkbook workbook = new XSSFWorkbook();
+		  // spreadsheet object
+        XSSFSheet spreadsheet
+            = workbook.createSheet(" secret keys ");
+        // creating a row object
+        XSSFRow row;
+        // This data needs to be written (Object[])
+        List< byte[]> keyData
+            = new ArrayList< byte[]>();
+            
 		MessagesPojo messages=new MessagesPojo(senderId,messagesList);
 		if (receiversArray.size()<= 5) {
 
@@ -66,8 +69,8 @@ public class SendMessageEndpoint {
 				try (Connection c = DatabaseConnection.getConnection()) {
 					PreparedStatement p1 = c.prepareStatement("SELECT * FROM users where email=?");
 					p1.setString(1, receiverEmail);
-					ResultSet r = p1.executeQuery();
-					if (r.next()) {
+					ResultSet receiverResult = p1.executeQuery();
+					if (receiverResult.next()) {
 
 						PreparedStatement p2 = c.prepareStatement("SELECT * FROM users where idusers=?");
 
@@ -86,7 +89,11 @@ public class SendMessageEndpoint {
 				        
 						messages.addMessage(message);
 						
+						keyData.add(privateKey);
+					
 						
+						
+						  
 						PreparedStatement s1 = c.prepareStatement("SELECT * FROM users where idusers=?");
 						s1.setInt(1, senderId);
 
@@ -127,16 +134,7 @@ public class SendMessageEndpoint {
     					
     						statementsecret.executeQuery();
     						
-    						//writing to file
-    						
-    						try {
-    						securedFile.write(messageId);
-    						securedFile.write(privateKey);
-    						securedFile.write(encryptedMessage);
-    						securedFile.write('\n');
-    						}catch (IOException ex) {
-    							System.out.println(ex.getMessage());
-    						}
+    				
     						
     						
     						
@@ -151,7 +149,27 @@ public class SendMessageEndpoint {
 
 						 sQuery=ins1.executeUpdate();
 
-						Receiver rec = new Receiver(r.getInt(1), r.getString(2), r.getString(3));
+						Receiver rec = new Receiver(receiverResult.getInt(1), receiverResult.getString(2), receiverResult.getString(3));
+						
+						//writing to file
+						 row = spreadsheet.createRow(rec.getIdUser()-1);
+						 byte[] objectArr = privateKey;
+						 Cell cell = row.createCell(messageId);
+						 cell.setCellValue(objectArr.toString());
+					
+						 
+						 FileOutputStream out = new FileOutputStream(
+						            new File("/Users/zeriab/Desktop/messaging/GFGsheet.xlsx"));
+						 workbook.write(out);
+					        out.close();
+						try {
+						securedFile.write(messageId);
+						securedFile.write(privateKey);
+						securedFile.write(encryptedMessage);
+						securedFile.write('\n');
+						}catch (IOException ex) {
+							System.out.println(ex.getMessage());
+						}
 						if (messageId >= 0) {
 							PreparedStatement ins2 = c.prepareStatement(
 									"INSERT INTO receiver(`users_idusers`, `datetime`, `messages_idmessages`, `messages_idsender`) VALUES(?,?,?,?) ");
