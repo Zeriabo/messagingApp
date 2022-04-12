@@ -17,6 +17,7 @@ import fi.messaging.pojos.Sender;
 import fi.messaging.security.RSAKeyPairGenerator;
 import fi.messaging.security.RSAUtil;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.security.PublicKey;
@@ -34,6 +35,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 public class SendMessageEndpoint {
 	int row = 0;
 
+	@SuppressWarnings("resource")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	@POST
@@ -49,13 +51,21 @@ public class SendMessageEndpoint {
 		Response response = new Response();
 		int senderId = Integer.parseInt(email.getSenderId());
 		List<String> receiversArray = email.getReceivers();
-		File file = new File("/Users/zeriab/Desktop/messaging/keys.secured");
-		@SuppressWarnings("resource")
-		FileOutputStream securedFile = new FileOutputStream(file);
-		XSSFWorkbook workbook = new XSSFWorkbook();
+		XSSFWorkbook workbook;
 		  // spreadsheet object
-        XSSFSheet spreadsheet
-            = workbook.createSheet(" secret keys ");
+        XSSFSheet spreadsheet;
+        // check if exists
+        File file = new File("./GFGsheet.xlsx"); 
+        workbook = new XSSFWorkbook();
+        if(file.exists())
+        {   
+        	FileInputStream fis = new FileInputStream(file);
+        	workbook = new XSSFWorkbook(fis);
+        	spreadsheet=workbook.getSheet("secret keys");
+        }else {
+                spreadsheet
+                = workbook.createSheet("secret keys");	
+     }
         // creating a row object
         XSSFRow row;
         // This data needs to be written (Object[])
@@ -154,20 +164,16 @@ public class SendMessageEndpoint {
 						//writing to file
 						 row = spreadsheet.createRow(rec.getIdUser()-1);
 						 byte[] objectArr = privateKey;
-						 Cell cell = row.createCell(messageId);
+						 Cell cell = row.createCell(messageId-1);
 						 cell.setCellValue(objectArr.toString());
 					
 						 
 						 FileOutputStream out = new FileOutputStream(
 						            new File("/Users/zeriab/Desktop/messaging/GFGsheet.xlsx"));
+						 try {
 						 workbook.write(out);
 					        out.close();
-						try {
-						securedFile.write(messageId);
-						securedFile.write(privateKey);
-						securedFile.write(encryptedMessage);
-						securedFile.write('\n');
-						}catch (IOException ex) {
+						 }catch (IOException ex) {
 							System.out.println(ex.getMessage());
 						}
 						if (messageId >= 0) {
