@@ -31,5 +31,5 @@ also the program provides top 10 users (by sent message count) sorted by decreas
 please feel free to see the app on the master branch.
 
 Remark: the code is on a regular updates.<br />
-Coming update: making second backup for the keys in a coded excel sheet where the row number is the userId (receiver id) and the column is the messageId <br />
+Coming update: making second backup for the keys in a coded excel sheet where the row number is the userId (receiver id) and the column is the messageId *Done need more testing and code cleaning <br />
 Coming update: creating a react app which interact with the java backend<br />
