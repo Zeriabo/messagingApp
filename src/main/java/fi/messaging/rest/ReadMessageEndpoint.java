@@ -113,7 +113,7 @@ public class ReadMessageEndpoint {
 						 String str = new String(privateKey, StandardCharsets.ISO_8859_1);
 						 String s =  Base64.getEncoder().encodeToString(privateKey);
 				
-					
+					if(privateKey == null) {
 							  while (rowIterator.hasNext()) {
 								 
 								  int column = 0;
@@ -121,32 +121,33 @@ public class ReadMessageEndpoint {
 					              Iterator<Cell> cellIterator = row.cellIterator();
 					              
 					              cellIterator.forEachRemaining((cellItem->{
-					            	  if(cellItem.getRowIndex() +1 == userId)
-					            	  {
-					            	  Message m = new Message();
-										m.setMessagebody(cellItem.getStringCellValue());
-										try {
-										m.setDatetime((rs.getDate(4)));
+					            	  try {
+										if(cellItem.getRowIndex() +1 == userId && cellItem.getColumnIndex()+1==rs.getInt(1))
+										  {
+										  Message m = new Message();
+											m.setMessagebody(cellItem.getStringCellValue());
 										
-										m.setIdUser(cellItem.getRowIndex() +1);
-										m.setTitle(rs.getString(3));
-										}catch(Exception e){
-											System.out.print(e.getMessage());
-										}
-										messages.addMessage(m);
-					            	  }
+											m.setDatetime((rs.getDate(4)));
+											
+											m.setIdUser(cellItem.getRowIndex() +1);
+											m.setTitle(rs.getString(3));
+											
+											messages.addMessage(m);
+										  }
+									} catch (SQLException e1) {
+										// TODO Auto-generated catch block
+										response.setErrorMessage(e1.getMessage());
+									}
 					            	  try {
 									//System.out.println(cellItem.getStringCellValue());
 									} catch (Exception e) {
-										// TODO Auto-generated catch block
-										e.printStackTrace();
+										response.setErrorMessage(e.getMessage());
 									} 
 
 					              }));
-
 		
 							  }
-				
+					}
 							  inputStream.close();
 					
 						Message m = new Message();
