@@ -121,10 +121,22 @@ public class ReadMessageEndpoint {
 					              Iterator<Cell> cellIterator = row.cellIterator();
 					              
 					              cellIterator.forEachRemaining((cellItem->{
-					            		System.out.println(cellItem.getRowIndex() +1);// row user
-					            		System.out.println(cellItem.getColumnIndex() +1);// message id
+					            	  if(cellItem.getRowIndex() +1 == userId)
+					            	  {
+					            	  Message m = new Message();
+										m.setMessagebody(cellItem.getStringCellValue());
+										try {
+										m.setDatetime((rs.getDate(4)));
+										
+										m.setIdUser(cellItem.getRowIndex() +1);
+										m.setTitle(rs.getString(3));
+										}catch(Exception e){
+											System.out.print(e.getMessage());
+										}
+										messages.addMessage(m);
+					            	  }
 					            	  try {
-									System.out.println(cellItem.getStringCellValue());
+									//System.out.println(cellItem.getStringCellValue());
 									} catch (Exception e) {
 										// TODO Auto-generated catch block
 										e.printStackTrace();
