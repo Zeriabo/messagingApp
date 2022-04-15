@@ -30,6 +30,8 @@ also the program provides top 10 users (by sent message count) sorted by decreas
 
 please feel free to see the app on the master branch.
 
+Updates:
+making second backup for the keys on excel file if the key not found in the database it will be searched from the excel file <br />
 Remark: the code is on a regular updates.<br />
-Coming update: making second backup for the keys <br />
+Coming update: encrypt the excel file<br />
 Coming update: creating a react app which interact with the java backend<br />
