@@ -56,6 +56,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 @Path("/readmessage")
 public class ReadMessageEndpoint {
 
+	@SuppressWarnings("unused")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	@GET
@@ -75,6 +76,7 @@ public class ReadMessageEndpoint {
 		  byte[] bytes =null;
 		  byte[] decode = null;
 		  byte[] privateKey = null;
+		  boolean skip=false;
 		try (Connection c = DatabaseConnection.getConnection()) {
 
 			PreparedStatement p1 = c.prepareStatement("SELECT * FROM users where email=?");
@@ -103,19 +105,23 @@ public class ReadMessageEndpoint {
 					while (rs.next()) {
 
 						PreparedStatement statementsecret = c.prepareStatement(
-								"SELECT * FROM messaging.secret_keys\n" + "where messages_idmessages=?;" + "",
-								Statement.RETURN_GENERATED_KEYS);
+								"SELECT * FROM messaging.secret_keys\n" + "where messages_idmessages=?;");
 
 						statementsecret.setInt(1, rs.getInt(1));
 						ResultSet res = statementsecret.executeQuery();
-               
 						res.first();
+				
+		
+			
 						try {
+							
 						 privateKey = res.getBytes(2);
-						 String str = new String(privateKey, StandardCharsets.ISO_8859_1);
-						 String s =  Base64.getEncoder().encodeToString(privateKey);
+			
 						}
 					catch(SQLDataException exp){
+			
+						skip=true;
+						System.out.println(exp.getMessage());
 							  while (rowIterator.hasNext()) {
 								 
 								  int column = 0;
@@ -124,14 +130,16 @@ public class ReadMessageEndpoint {
 					              
 					              cellIterator.forEachRemaining((cellItem->{
 					            	  try {
+					            		  int m=cellItem.getRowIndex()+1;
+					            		  int n=cellItem.getColumnIndex()+1;
 										if(cellItem.getRowIndex() +1 == userId && cellItem.getColumnIndex()+1==rs.getInt(1))
 										  {
-										  Message m = new Message();
-											m.setMessagebody(cellItem.getStringCellValue());
-											m.setDatetime((rs.getDate(4)));
-											m.setIdUser(cellItem.getRowIndex() +1);
-											m.setTitle(rs.getString(3));
-											messages.addMessage(m);
+										  Message m1 = new Message();
+											m1.setMessagebody(cellItem.getStringCellValue());
+											m1.setDatetime((rs.getDate(4)));
+											m1.setIdUser(cellItem.getRowIndex() +1);
+											m1.setTitle(rs.getString(3));
+											messages.addMessage(m1);
 										  }
 									} catch (SQLException e1) {
 										// TODO Auto-generated catch block
@@ -148,14 +156,21 @@ public class ReadMessageEndpoint {
 							  }
 					}
 							  inputStream.close();
-					
+				if(!skip) {
 						Message m = new Message();
+					
 						m.setMessagebody(getMessageDecrypted(rs.getBytes(2), privateKey));
+						
+						
 						m.setDatetime((rs.getDate(4)));
 						m.setIdUser(rs.getInt(5));
 						m.setTitle(rs.getString(3));
 						messages.addMessage(m);
+						
+				}
+				skip=false;
 					}
+					
 
 				}
 
