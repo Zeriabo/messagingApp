@@ -9,6 +9,7 @@ import fi.messaging.app.DatabaseConnection;
 
 import java.security.*;
 import java.security.spec.InvalidKeySpecException;
+import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -75,5 +76,12 @@ public class RSAUtil {
 
    
 
+    public static PrivateKey convertArrayToPriKey(byte encoded[]) throws Exception {
+    	      String algorithm = "RSA";
+    		  PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(encoded);
+    		  KeyFactory keyFactory = KeyFactory.getInstance(algorithm);
+    		  PrivateKey priKey = keyFactory.generatePrivate(keySpec);
+    		  return priKey;
+    		 }
 
 }

@@ -1,5 +1,11 @@
 package fi.messaging.rest;
 
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.io.PushbackInputStream;
+import java.nio.charset.StandardCharsets;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.KeyFactory;
@@ -14,6 +20,11 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Scanner;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
@@ -24,6 +35,8 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import fi.messaging.app.DatabaseConnection;
@@ -32,7 +45,12 @@ import fi.messaging.pojos.MessagesPojo;
 import fi.messaging.pojos.ReceivePojo;
 import fi.messaging.pojos.Response;
 import fi.messaging.security.RSAUtil;
-
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 @Path("/readmessage")
 public class ReadMessageEndpoint {
@@ -45,10 +63,17 @@ public class ReadMessageEndpoint {
 
 		ObjectMapper mapper = new ObjectMapper();
 		ReceivePojo receive = mapper.readValue(email, ReceivePojo.class);
-
+		 InputStream inputStream = null;
 		Response response = new Response();
-		MessagesPojo messages = new MessagesPojo();
-
+		MessagesPojo messages = new MessagesPojo();	
+		  String path = "./GFGsheet.xlsx";
+		  inputStream = new FileInputStream(path);
+		  XSSFWorkbook workBook = (XSSFWorkbook) WorkbookFactory.create(new PushbackInputStream(inputStream));
+		  XSSFSheet mySheet = workBook.getSheetAt(0);
+		  Iterator<Row> rowIterator = mySheet.iterator();
+		  byte[] bytes =null;
+		  byte[] decode = null;
+	
 		try (Connection c = DatabaseConnection.getConnection()) {
 
 			PreparedStatement p1 = c.prepareStatement("SELECT * FROM users where email=?");
@@ -85,17 +110,39 @@ public class ReadMessageEndpoint {
 
 						res.first();
 						byte[] privateKey = res.getBytes(2);
+						 String str = new String(privateKey, StandardCharsets.ISO_8859_1);
+						 String s =  Base64.getEncoder().encodeToString(privateKey);
+				
+					
+							  while (rowIterator.hasNext()) {
+								 
+								  int column = 0;
+					              Row row = rowIterator.next();
+					              Iterator<Cell> cellIterator = row.cellIterator();
+					              
+					              cellIterator.forEachRemaining((cellItem->{
+					            		System.out.println(cellItem.getRowIndex() +1);// row user
+					            		System.out.println(cellItem.getColumnIndex() +1);// message id
+					            	  try {
+									System.out.println(cellItem.getStringCellValue());
+									} catch (Exception e) {
+										// TODO Auto-generated catch block
+										e.printStackTrace();
+									} 
 
+					              }));
+
+		
+							  }
+				
+							  inputStream.close();
+					
 						Message m = new Message();
 						m.setMessagebody(getMessageDecrypted(rs.getBytes(2), privateKey));
 						m.setDatetime((rs.getDate(4)));
 						m.setIdUser(rs.getInt(5));
 						m.setTitle(rs.getString(3));
-						System.out.println(m.toString());
 						messages.addMessage(m);
-						messages.getMessages().forEach((mess) -> {
-							System.out.print(mess);
-						});
 					}
 
 				}
@@ -107,6 +154,7 @@ public class ReadMessageEndpoint {
 
 			}
 		} catch (Exception e) {
+
 			response.setStatus(false);
 			response.setErrorMessage(e.getMessage());
 			response.setCode(500);
