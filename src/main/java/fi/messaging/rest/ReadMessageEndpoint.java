@@ -126,12 +126,9 @@ public class ReadMessageEndpoint {
 										  {
 										  Message m = new Message();
 											m.setMessagebody(cellItem.getStringCellValue());
-										
 											m.setDatetime((rs.getDate(4)));
-											
 											m.setIdUser(cellItem.getRowIndex() +1);
 											m.setTitle(rs.getString(3));
-											
 											messages.addMessage(m);
 										  }
 									} catch (SQLException e1) {

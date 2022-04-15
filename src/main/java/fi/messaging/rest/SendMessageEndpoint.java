@@ -20,14 +20,12 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.security.PublicKey;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.List;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
@@ -37,7 +35,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 public class SendMessageEndpoint {
 	int row = 0;
 
-	@SuppressWarnings({ "resource", "unlikely-arg-type" })
+	@SuppressWarnings({ "resource" })
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	@POST
@@ -57,14 +55,19 @@ public class SendMessageEndpoint {
 		  // spreadsheet object
         XSSFSheet spreadsheet;
         File file = new File("./GFGsheet.xlsx"); 
-        workbook = new XSSFWorkbook();
+       
         if(file.exists())
         {   
         	FileInputStream fis = new FileInputStream(file);
         	workbook = new XSSFWorkbook(fis);
         	spreadsheet=workbook.getSheet("secret keys");
+        	if (spreadsheet == null) {
+        		spreadsheet = workbook.createSheet("secret keys");
+        	}
+        
         	fis.close();
         }else {
+        	 workbook = new XSSFWorkbook();
                 spreadsheet
                 = workbook.createSheet("secret keys");	
      }
@@ -164,8 +167,11 @@ public class SendMessageEndpoint {
 						Receiver rec = new Receiver(receiverResult.getInt(1), receiverResult.getString(2), receiverResult.getString(3));
 						
 						//writing to file
-						 row = spreadsheet.createRow(rec.getIdUser()-1); // row user 
-						
+						 row = spreadsheet.getRow(rec.getIdUser()-1); // row user 
+						if(row==null)
+						{
+							 row = spreadsheet.createRow(rec.getIdUser()-1); // row user 
+						}
 						 Cell cell = row.createCell(messageId-1); //column message id 
 						 cell.setCellValue(message.getMessagebody());
 					
