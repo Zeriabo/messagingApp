@@ -18,6 +18,7 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLDataException;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
@@ -73,7 +74,7 @@ public class ReadMessageEndpoint {
 		  Iterator<Row> rowIterator = mySheet.iterator();
 		  byte[] bytes =null;
 		  byte[] decode = null;
-	
+		  byte[] privateKey = null;
 		try (Connection c = DatabaseConnection.getConnection()) {
 
 			PreparedStatement p1 = c.prepareStatement("SELECT * FROM users where email=?");
@@ -107,13 +108,14 @@ public class ReadMessageEndpoint {
 
 						statementsecret.setInt(1, rs.getInt(1));
 						ResultSet res = statementsecret.executeQuery();
-
+               
 						res.first();
-						byte[] privateKey = res.getBytes(2);
+						try {
+						 privateKey = res.getBytes(2);
 						 String str = new String(privateKey, StandardCharsets.ISO_8859_1);
 						 String s =  Base64.getEncoder().encodeToString(privateKey);
-				
-					if(privateKey == null) {
+						}
+					catch(SQLDataException exp){
 							  while (rowIterator.hasNext()) {
 								 
 								  int column = 0;
