@@ -40,8 +40,8 @@ of the RSA key length in bits divided with eight minus eleven padding
 bytes, i.e. number of maximum bytes = key length in bits / 8 – 11.
 Todo:  
 generate a symmetric key
-Encrypt the data with the symmetric key
-Encrypt the symmetric key with rsa
-send the encrypted key and the data
-Decrypt the encrypted symmetric key with rsa
-decrypt the data with the symmetric key
+Encrypt the data with the symmetric key \n
+Encrypt the symmetric key with rsa \n
+send the encrypted key and the data \n
+Decrypt the encrypted symmetric key with rsa \n
+decrypt the data with the symmetric key \n
