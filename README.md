@@ -38,3 +38,10 @@ Coming update: creating a react app which interact with the java backend<br />
 Remark: to encrypt the file The RSA algorithm can only encrypt data that has a maximum byte length
 of the RSA key length in bits divided with eight minus eleven padding
 bytes, i.e. number of maximum bytes = key length in bits / 8 – 11.
+Todo:  
+generate a symmetric key
+Encrypt the data with the symmetric key
+Encrypt the symmetric key with rsa
+send the encrypted key and the data
+Decrypt the encrypted symmetric key with rsa
+decrypt the data with the symmetric key
