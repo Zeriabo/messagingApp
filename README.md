@@ -35,3 +35,6 @@ making second backup for the keys on excel file if the key not found in the data
 Remark: the code is on a regular updates.<br />
 Coming update: encrypt the excel file<br />
 Coming update: creating a react app which interact with the java backend<br />
+Remark: to encrypt the file The RSA algorithm can only encrypt data that has a maximum byte length
+of the RSA key length in bits divided with eight minus eleven padding
+bytes, i.e. number of maximum bytes = key length in bits / 8 – 11.
