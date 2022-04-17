@@ -1,5 +1,9 @@
 package fi.messaging.rest;
 
+import javax.crypto.Cipher;
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -20,7 +24,17 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.security.KeyFactory;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -32,9 +46,12 @@ import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 @Path("/sendmessage")
+
+
 public class SendMessageEndpoint {
 	int row = 0;
-
+	byte[] secretKeyEncrypted;
+	 PrivateKey pvtfile;
 	@SuppressWarnings({ "resource" })
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
@@ -55,16 +72,44 @@ public class SendMessageEndpoint {
 		  // spreadsheet object
         XSSFSheet spreadsheet;
         File file = new File("./GFGsheet.xlsx"); 
+        byte[] privatebytes = Files.readAllBytes(Paths.get("./key.key"));
+        PKCS8EncodedKeySpec ks = new PKCS8EncodedKeySpec(privatebytes);
+        byte[] publicbytes = Files.readAllBytes(Paths.get("./key.pub"));
+        X509EncodedKeySpec ks1 = new X509EncodedKeySpec(publicbytes); 
+        KeyFactory kf = KeyFactory.getInstance("RSA");
+        PrivateKey pvts = kf.generatePrivate(ks); //private key to decrypt the secret key
+        PublicKey pubkey= kf.generatePublic(ks1); // public key to encrypt the secret key
+        //saving the private key to file
+        File privateFile = new File("./private/file"); //file to save the private key to
+         privateFile.createNewFile(); 
+         //saving the private key to decrypt the secured file
+        try (FileOutputStream fos = new FileOutputStream("./private/file")) {
+        	
+            fos.write(pvts.getEncoded());
+            fos.flush();
+            fos.close();
+        }
        
+        // Generate a DES key
+        KeyGenerator keyGen = KeyGenerator.getInstance("DES");
+        SecretKey key = keyGen.generateKey();   //secret key to code the file
+        secretKeyEncrypted= RSAUtil.wrapKey( pubkey,key); //encrypted by "RSA/ECB/OAEPWithSHA1AndMGF1Padding" public key
+      
+        File file2 = new File("./semetrickey.key");
+        FileOutputStream oute=new FileOutputStream(file2);
+        oute.write(secretKeyEncrypted);
+
         if(file.exists())
         {   
+        	
         	FileInputStream fis = new FileInputStream(file);
+
         	workbook = new XSSFWorkbook(fis);
         	spreadsheet=workbook.getSheet("secret keys");
         	if (spreadsheet == null) {
         		spreadsheet = workbook.createSheet("secret keys");
         	}
-        
+        	
         	fis.close();
         }else {
         	 workbook = new XSSFWorkbook();
@@ -95,9 +140,11 @@ public class SendMessageEndpoint {
 								datetime , senderId);
 		
 						RSAKeyPairGenerator	rSAKeyPairGenerator = new RSAKeyPairGenerator();
-					
+						
+						
+						
 						PublicKey publicKey	=rSAKeyPairGenerator.getPublicKey();
-			
+			          
 						byte[] encryptedMessage=RSAUtil.encrypt(message.getMessagebody(),publicKey);
 						
 				        byte[] privateKey = rSAKeyPairGenerator.getPrivateKey().getEncoded();
@@ -106,8 +153,7 @@ public class SendMessageEndpoint {
 						
 						keyData.add(privateKey);
 					
-						
-						
+					
 						  
 						PreparedStatement s1 = c.prepareStatement("SELECT * FROM users where idusers=?");
 						s1.setInt(1, senderId);
@@ -174,11 +220,18 @@ public class SendMessageEndpoint {
 						}
 						 Cell cell = row.createCell(messageId-1); //column message id 
 						 cell.setCellValue(message.getMessagebody());
-					
+						 
 						 
 						 FileOutputStream out = new FileOutputStream(file);
 						 try {
 						 workbook.write(out);
+						 FileOutputStream outfile = new FileOutputStream("./OutGFGsheet.xlsx");
+					
+					    	try (FileInputStream in = new FileInputStream(file) ) {
+					    		 Cipher cipher = Cipher.getInstance("DES/ECB/PKCS5Padding");
+					 	    	cipher.init(Cipher.ENCRYPT_MODE, key);
+					        RSAUtil.processFile(cipher, in, outfile);
+					    	}
 						 }catch (IOException ex) {
 							System.out.println(ex.getMessage());
 						}finally {
@@ -234,8 +287,14 @@ public class SendMessageEndpoint {
 	     	response.setErrorMessage("ERROR : not inserted");
 			response.setCode(500);
 		}
-
+	
+    	
 		return response;
 
 	}
+
+	   
+	  
+
+	   
 }

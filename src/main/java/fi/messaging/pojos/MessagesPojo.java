@@ -42,5 +42,11 @@ public class MessagesPojo {
 	public void addMessage(Message m) {
 		this.messages.add(m);
 	}
+	public void printMessages()
+	{
+		this.messages.forEach((message)->{
+			System.out.println(message.getMessagebody());
+		});
+	}
 
 }
