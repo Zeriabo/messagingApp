@@ -28,20 +28,26 @@ The message body is inserted encoded in the database as an array of bytes.
 A secured messaging application RESTful web service created by java 8  where the users the system can send encoded messages to each other and only the recipient can read the message by a key given to him. The messages are encoded with the public also the private key is generated for each message then inserted into the database encoded with the message id and the sender id. Also message body is encoded and inserted as Array of bytes inside the database, when each user wants to read the messages the messages are retrieved from database and decoded by the private key then they are given to the user.
 also the program provides top 10 users (by sent message count) sorted by decreasing sent message count for the last 30 days
 
+* The excel file is encrypted by a semetric key the process is:
+generate a symmetric key
+Encrypt the file with the symmetric key 
+Encrypt the symmetric key with rsa 
+save the   encrypted file
+save the encrypted symmetric key on the server the file is semetrickey.key
+
+Decrypt the encrypted symmetric key with rsa 
+decrypt the file with the symmetric key 
+get the messages from the file
+
 please feel free to see the app on the master branch.
 
 Updates:
 making second backup for the keys on excel file if the key not found in the database it will be searched from the excel file <br />
 Remark: the code is on a regular updates.<br />
-Coming update: encrypt the excel file<br />
+
 Coming update: creating a react app which interact with the java backend<br />
 Remark: to encrypt the file The RSA algorithm can only encrypt data that has a maximum byte length
 of the RSA key length in bits divided with eight minus eleven padding
 bytes, i.e. number of maximum bytes = key length in bits / 8 – 11.
-Todo:  
-generate a symmetric key
-Encrypt the data with the symmetric key 
-Encrypt the symmetric key with rsa 
-send the encrypted key and the data 
-Decrypt the encrypted symmetric key with rsa 
-decrypt the data with the symmetric key 
+
+
