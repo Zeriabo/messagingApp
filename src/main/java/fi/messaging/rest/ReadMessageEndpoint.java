@@ -75,9 +75,7 @@ public class ReadMessageEndpoint {
 		FileOutputStream outStream = new FileOutputStream("./GFGsheetDecrypted.xlsx");
 		Response response = new Response();
 		MessagesPojo messages = new MessagesPojo();
-		
-		// get the private key from "./private/file" and decrypt the file which is written by byte[] and decrypt the secret key
-		
+	
 		File privateKeyFile = new File("./private/file");
 		FileInputStream fileInputStream = new FileInputStream(privateKeyFile);
 		byte[] privateKeyBytes=fileInputStream.readAllBytes(); // reading byte[] private\Key
