@@ -14,7 +14,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-
+import javax.ws.rs.core.Response;
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
@@ -24,14 +24,11 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import fi.messaging.app.DatabaseConnection;
 import fi.messaging.pojos.Message;
 import fi.messaging.pojos.MessagesPojo;
 import fi.messaging.pojos.ReceivePojo;
-import fi.messaging.pojos.Response;
 import fi.messaging.pojos.Sender;
 import fi.messaging.security.RSAUtil;
 
@@ -39,6 +36,7 @@ import fi.messaging.security.RSAUtil;
 @Path("/readmessagefromsender")
 public class ReadMessageFromSenderEndpoint {
 
+	@SuppressWarnings("static-access")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	@GET
@@ -46,7 +44,7 @@ public class ReadMessageFromSenderEndpoint {
 	public Response readMessage(@QueryParam("receiverEmail") String receiverEmail,@QueryParam("senderEmail") String senderEmail) throws Exception {
 
 
-		Response response = new Response();
+		Response response = null;
 		MessagesPojo messages = new MessagesPojo();
 
 		try (Connection c = DatabaseConnection.getConnection()) {
@@ -109,26 +107,22 @@ public class ReadMessageFromSenderEndpoint {
 				}
 
 			} else {
-				response.setStatus(true);
-				response.setErrorMessage("no messages");
-				response.setCode(444);
-
+				 response =Response.status(Response.Status.ACCEPTED).build();
+				 response.status(200);
 			}
 		} catch (Exception e) {
-			response.setStatus(false);
-			response.setErrorMessage(e.getMessage());
-			response.setCode(500);
-
+			response= Response.serverError().entity(e.getMessage()).build();
+			 response.status(500);
 		}
 
 		if (messages.getMessages().size() > 0) {
 
-			response.setStatus(true);
-			response.setMessages(messages);
+			 response =Response.status(Response.Status.ACCEPTED).build();
+			 response.status(200);
 
 		}else if (messages.getMessages().size() == 0) {
-			response.setStatus(true);
-			response.setErrorMessage("No messages");
+			 response =Response.status(Response.Status.ACCEPTED).build();
+			
 		}
 		return response;
 	}

@@ -20,7 +20,19 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Base64;
+/*
+ * 	byte[] bytes1 = Files.readAllBytes(Paths.get("./key.pub"));
+				X509EncodedKeySpec ks11 = new X509EncodedKeySpec(bytes1);
+				KeyFactory kf1 = KeyFactory.getInstance("RSA");
+				pubkey = kf1.generatePublic(ks11);
 
+				byte[] pbytes = Files.readAllBytes(Paths.get("./key.key"));
+				PKCS8EncodedKeySpec pks = new PKCS8EncodedKeySpec(pbytes);
+				KeyFactory pkf = KeyFactory.getInstance("RSA");
+				 pvtfile = pkf.generatePrivate(pks);
+ 
+ * 
+ */
 public class RSAUtil {
 
 
@@ -100,7 +112,8 @@ public class RSAUtil {
 		        	out.write(obuf);
 		        }
 		    }
-		    byte[] obuf = ci.doFinal();
+	
+		    byte[] obuf = ci.doFinal(in.readAllBytes());
 		    if ( obuf != null ) 
 		    	{
 		    	out.write(obuf);
@@ -126,7 +139,8 @@ public class RSAUtil {
 	                e);
 	    }
 	}
-	public static  Key unWrapKey(PrivateKey key, byte[] keybytes)
+	
+	public static  SecretKey unWrapKey(PrivateKey key, byte[] keybytes)
 	        throws InvalidKeyException, IllegalBlockSizeException {
 		
 	    try {
@@ -136,8 +150,8 @@ public class RSAUtil {
 	        final Key unwrapped = cipher.unwrap(keybytes,
 	        		"RSA/ECB/OAEPWithSHA1AndMGF1Padding",
 	        		Cipher.SECRET_KEY);
-	      //  SecretKey originalKey = new SecretKeySpec(wrapped.getEncoded(),0,wrapped.getEncoded().length, "AES");
-	        return unwrapped;
+	        SecretKey originalKey = new SecretKeySpec(unwrapped.getEncoded(),0,unwrapped.getEncoded().length, "DES");
+	        return originalKey;
 	    } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
 	        throw new IllegalStateException(
 	                "Java runtime does not support RSA/ECB/OAEPWithSHA1AndMGF1Padding",

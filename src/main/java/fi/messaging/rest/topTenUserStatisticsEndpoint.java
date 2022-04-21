@@ -11,10 +11,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.util.ArrayList;
-
 import fi.messaging.app.DatabaseConnection;
-import fi.messaging.pojos.Response;
-
+import javax.ws.rs.core.Response;
 @Path("/readuserstatistics")
 
 public class topTenUserStatisticsEndpoint {
@@ -29,7 +27,7 @@ public class topTenUserStatisticsEndpoint {
 		ArrayList<String> resultsArray = new ArrayList<String>(10);
 		String columnValue = "";
 		int columnsNumber = 0;
-		Response response = new Response();
+		Response response = null;
 
 		try (Connection c = DatabaseConnection.getConnection()) {
 
@@ -61,7 +59,7 @@ public class topTenUserStatisticsEndpoint {
 			}
 		}
 		if (resultsArray.size() > 0) {
-			response.setStatus(true);
+	
 			resultsArray.forEach((mess) -> {
 				if (mess != null) {
 
@@ -70,7 +68,7 @@ public class topTenUserStatisticsEndpoint {
 			});
 
 		} else {
-			response.setStatus(false);
+		
 	//		response.setMessage("didnt get Anything");
 		}
 		return response;

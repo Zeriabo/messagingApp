@@ -3,20 +3,18 @@ package fi.messaging.rest;
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
+import javax.ws.rs.core.Response;
 import fi.messaging.app.DatabaseConnection;
 import fi.messaging.pojos.Email;
 import fi.messaging.pojos.Message;
 import fi.messaging.pojos.MessagesPojo;
 import fi.messaging.pojos.Receiver;
-import fi.messaging.pojos.Response;
 import fi.messaging.pojos.Sender;
 import fi.messaging.security.RSAKeyPairGenerator;
 import fi.messaging.security.RSAUtil;
@@ -24,13 +22,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.KeyFactory;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.spec.PKCS8EncodedKeySpec;
@@ -64,8 +58,8 @@ public class SendMessageEndpoint {
 		int messageId = -1;
 		int sQuery=0;
 		int rQuery=0;
-		ArrayList<Message> messagesList = new ArrayList<Message>();;
-		Response response = new Response();
+		Response response =null;
+		ArrayList<Message> messagesList = new ArrayList<Message>();
 		int senderId = Integer.parseInt(email.getSenderId());
 		List<String> receiversArray = email.getReceivers();
 		XSSFWorkbook workbook;
@@ -247,49 +241,42 @@ public class SendMessageEndpoint {
 							ins2.setInt(3, messageId);
 							ins2.setInt(4, senderId);
 							 rQuery=ins2.executeUpdate();
-							
-							
+			
 						}
+						
                         }else {
-                        	response.setStatus(false);
-    						response.setErrorMessage("ERROR: Wrong input sender is not found!");
-    						response.setCode(500);
-    						return response;
+
+                        	response= Response.status(Response.Status.NOT_FOUND).build();
                         }
 
 					}else {
-						response.setStatus(false);
-						response.setErrorMessage("ERROR: Wrong input");
-						response.setCode(500);
-						return response;
+				
+						//response.setErrorMessage("ERROR: Wrong input");
+						
+						response= Response.status(Response.Status.NOT_ACCEPTABLE).build();
 					}
 				}catch(Exception e)
 				{
-					response.setStatus(false);
-					response.setErrorMessage(e.getMessage());
-					response.setCode(e.hashCode());
-					return response;
+					response= Response.serverError().entity(e.getMessage()).build();
 				}
 			}
 			if(messageId!=0 && rQuery>0 && sQuery>0 )
 			{
-				Response successResponse = new Response(200,true,messages);
-				return successResponse;
+				response= Response.ok(messages).build();
 			}
 
 	
 		} else if (receiversArray.size() > 5) {
-			response.setStatus(false);
-			response.setCode(500);
-			response.setErrorMessage("more than 5 receipient");
+			return Response.status(Response.Status.NOT_ACCEPTABLE).build();
+			//response.setErrorMessage("more than 5 receipient");
 		} else {
-			response.setStatus(false);
-	     	response.setErrorMessage("ERROR : not inserted");
-			response.setCode(500);
+			 response =Response.status(Response.Status.NOT_ACCEPTABLE).build();
+	   
 		}
+		return response;
 	
     	
-		return response;
+	
 
 	}
 
