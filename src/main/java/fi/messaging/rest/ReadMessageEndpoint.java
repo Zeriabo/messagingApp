@@ -116,7 +116,6 @@ public class ReadMessageEndpoint {
 					
 						 while (rowIterator.hasNext()) {
 							 
-							  int column = 0;
 				              Row row = rowIterator.next();
 				              Iterator<Cell> cellIterator = row.cellIterator();
 				              
@@ -133,12 +132,12 @@ public class ReadMessageEndpoint {
 										messages.addMessage(m);
 									  }
 								} catch (SQLException e1) {
-									// TODO Auto-generated catch block
+									
 									Response response2= Response.serverError().entity(e1.getMessage()).build();
 									 response2.status(500);
 								}
 				            	  try {
-								//System.out.println(cellItem.getStringCellValue());
+								
 								} catch (Exception e) {
 									Response response2= Response.serverError().entity(e.getMessage()).build();
 									 response2.status(500);
@@ -151,13 +150,8 @@ public class ReadMessageEndpoint {
 
 						
 						try {
-							if(res.getBytes(2) != null)
-							{
-								System.out.print("han 7atna el gamal");
-							}
+							
 						privateKey = res.getBytes(2);
-						 String str = new String(privateKey, StandardCharsets.ISO_8859_1);
-						 String s =  Base64.getEncoder().encodeToString(privateKey);
 							Message m = new Message();
 							m.setMessagebody(getMessageDecrypted(rs.getBytes(2), privateKey));
 							m.setDatetime((rs.getDate(4)));
