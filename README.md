@@ -45,6 +45,8 @@ Updates:
 making second backup for the keys on excel file if the key not found in the database it will search the message from the crypted excel file <br />
 Remark: the code is on a regular updates.<br />
 
+Coming update: making a login for the user<br />
+Coming update: users can't read other users messages<br />
 Coming update: creating a react app which interact with the java backend<br />
 
 
