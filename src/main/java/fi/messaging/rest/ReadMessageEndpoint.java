@@ -99,9 +99,9 @@ public class ReadMessageEndpoint {
 					statement2.setInt(1, userId);
 
 					ResultSet rs = statement2.executeQuery();
-
+  
 					while (rs.next()) {
-
+        
 						PreparedStatement statementsecret = c.prepareStatement(
 								"SELECT * FROM messaging.secret_keys\n" + "where messages_idmessages=?;" + "",
 								Statement.RETURN_GENERATED_KEYS);
@@ -109,57 +109,74 @@ public class ReadMessageEndpoint {
 						statementsecret.setInt(1, rs.getInt(1));
 						ResultSet res = statementsecret.executeQuery();
 
-						res.first();
+						
+						if (res.next() == false) { 
+							
+							System.out.println("No secret key for this message");
+					
+						 while (rowIterator.hasNext()) {
+							 
+							  int column = 0;
+				              Row row = rowIterator.next();
+				              Iterator<Cell> cellIterator = row.cellIterator();
+				              
+				              cellIterator.forEachRemaining((cellItem->{
+				            	  try {
+									if(cellItem.getRowIndex() +1 == userId && cellItem.getColumnIndex()+1==rs.getInt(1))
+									  {
+									  Message m = new Message();
+										m.setMessagebody(cellItem.getStringCellValue());
+										m.setDatetime((rs.getDate(4)));
+										m.setIdUser(cellItem.getRowIndex() +1);
+										m.setTitle(rs.getString(3));
+										m.setId(rs.getInt(1));
+										messages.addMessage(m);
+									  }
+								} catch (SQLException e1) {
+									// TODO Auto-generated catch block
+									Response response2= Response.serverError().entity(e1.getMessage()).build();
+									 response2.status(500);
+								}
+				            	  try {
+								//System.out.println(cellItem.getStringCellValue());
+								} catch (Exception e) {
+									Response response2= Response.serverError().entity(e.getMessage()).build();
+									 response2.status(500);
+								} 
+
+				              }));
+	
+						  }
+						}else {
+
+						
 						try {
+							if(res.getBytes(2) != null)
+							{
+								System.out.print("han 7atna el gamal");
+							}
 						privateKey = res.getBytes(2);
 						 String str = new String(privateKey, StandardCharsets.ISO_8859_1);
 						 String s =  Base64.getEncoder().encodeToString(privateKey);
+							Message m = new Message();
+							m.setMessagebody(getMessageDecrypted(rs.getBytes(2), privateKey));
+							m.setDatetime((rs.getDate(4)));
+							m.setIdUser(rs.getInt(5));
+							m.setTitle(rs.getString(3));
+							m.setId(rs.getInt(1));
+							messages.addMessage(m);
+					
 						}catch(SQLDataException s)
 						{
-							System.out.println("SQL exception");
-							 while (rowIterator.hasNext()) {
-								 
-								  int column = 0;
-					              Row row = rowIterator.next();
-					              Iterator<Cell> cellIterator = row.cellIterator();
-					              
-					              cellIterator.forEachRemaining((cellItem->{
-					            	  try {
-										if(cellItem.getRowIndex() +1 == userId && cellItem.getColumnIndex()+1==rs.getInt(1))
-										  {
-										  Message m = new Message();
-											m.setMessagebody(cellItem.getStringCellValue());
-											m.setDatetime((rs.getDate(4)));
-											m.setIdUser(cellItem.getRowIndex() +1);
-											m.setTitle(rs.getString(3));
-											messages.addMessage(m);
-										  }
-									} catch (SQLException e1) {
-										// TODO Auto-generated catch block
-										Response response2= Response.serverError().entity(e1.getMessage()).build();
-										 response2.status(500);
-									}
-					            	  try {
-									//System.out.println(cellItem.getStringCellValue());
-									} catch (Exception e) {
-										Response response2= Response.serverError().entity(e.getMessage()).build();
-										 response2.status(500);
-									} 
-
-					              }));
-		
-							  }
+							System.out.println("SQL exception "+s.getMessage());
+							
 						}
-				
+					}
+						System.out.println("SQL exception "+rs.getInt(1));
+					}
            	  inputStream.close();
 					
-						Message m = new Message();
-						m.setMessagebody(getMessageDecrypted(rs.getBytes(2), privateKey));
-						m.setDatetime((rs.getDate(4)));
-						m.setIdUser(rs.getInt(5));
-						m.setTitle(rs.getString(3));
-						messages.addMessage(m);
-					}
+				
 
 				}
 
