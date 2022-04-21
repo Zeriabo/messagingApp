@@ -105,47 +105,37 @@ public class ReadMessageEndpoint {
 						PreparedStatement statementsecret = c.prepareStatement(
 								"SELECT * FROM messaging.secret_keys\n" + "where messages_idmessages=?;" + "",
 								Statement.RETURN_GENERATED_KEYS);
-
+						 System.out.println(rs.getInt(1));
 						statementsecret.setInt(1, rs.getInt(1));
 						ResultSet res = statementsecret.executeQuery();
 
 						
 						if (res.next() == false) { 
-							
-							System.out.println("No secret key for this message");
 					
-						 while (rowIterator.hasNext()) {
-							 
-				              Row row = rowIterator.next();
-				              Iterator<Cell> cellIterator = row.cellIterator();
-				              
-				              cellIterator.forEachRemaining((cellItem->{
-				            	  try {
-									if(cellItem.getRowIndex() +1 == userId && cellItem.getColumnIndex()+1==rs.getInt(1))
-									  {
-									  Message m = new Message();
-										m.setMessagebody(cellItem.getStringCellValue());
-										m.setDatetime((rs.getDate(4)));
-										m.setIdUser(cellItem.getRowIndex() +1);
-										m.setTitle(rs.getString(3));
-										m.setId(rs.getInt(1));
-										messages.addMessage(m);
-									  }
-								} catch (SQLException e1) {
-									
-									Response response2= Response.serverError().entity(e1.getMessage()).build();
-									 response2.status(500);
-								}
-				            	  try {
-								
-								} catch (Exception e) {
-									Response response2= Response.serverError().entity(e.getMessage()).build();
-									 response2.status(500);
-								} 
+							    Row row = mySheet.getRow(userId-1);
+							    for (int cellIndex = row.getFirstCellNum(); cellIndex < row.getLastCellNum(); cellIndex++) {
+							        Cell cell = row.getCell(cellIndex, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK);
+							        try {
+					            		  System.out.println(cell); 
+					            		  System.out.println(rs.getInt(1));
+										if(cell.getRowIndex() +1 == userId && cell.getColumnIndex()+1==rs.getInt(1))
+										  {
+										  Message m = new Message();
+											m.setMessagebody(cell.getStringCellValue());
+											m.setDatetime((rs.getDate(4)));
+											m.setIdUser(cell.getRowIndex() +1);
+											m.setTitle(rs.getString(3));
+											m.setId(rs.getInt(1));
+											messages.addMessage(m);
+											break;
+										  }
+									} catch (SQLException e1) {
+										
+										Response response2= Response.serverError().entity(e1.getMessage()).build();
+										 response2.status(500);
+									}
+							    }
 
-				              }));
-	
-						  }
 						}else {
 
 						
@@ -160,13 +150,14 @@ public class ReadMessageEndpoint {
 							m.setId(rs.getInt(1));
 							messages.addMessage(m);
 					
-						}catch(SQLDataException s)
+						}catch(SQLDataException e)
 						{
-							System.out.println("SQL exception "+s.getMessage());
+							response= Response.serverError().entity(e.getMessage()).build();
+							 response.status(500);
 							
 						}
 					}
-						System.out.println("SQL exception "+rs.getInt(1));
+						
 					}
            	  inputStream.close();
 					
