@@ -86,6 +86,33 @@ public class SendMessageEndpoint {
        
         // Generate a DES key
         KeyGenerator keyGen = KeyGenerator.getInstance("DES");
+        //Get Semetric key from the file 
+        File semetricKeyFile= new File("./semetrickey.key");
+        FileInputStream fin = new FileInputStream(semetricKeyFile);
+        byte fileContent[] = new byte[(int)file.length()];
+        byte[]  smeKey=new byte[(int)semetricKeyFile.length()];
+        fin.read(fileContent);
+        String s = new String(fileContent);
+        System.out.println("File content: " + s);
+        
+        
+        
+        
+        
+        FileOutputStream outfile = new FileOutputStream("./OutGFGsheetDecrypted.xlsx");
+        
+    	try (FileInputStream infile = new FileInputStream("./OutGFGsheet.xlsx") ) {
+    		 Cipher cipher = Cipher.getInstance("DES/ECB/PKCS5Padding");
+ 	    	//cipher.init(Cipher.ENCRYPT_MODE, key);
+ 	    	
+        RSAUtil.processFile(cipher, infile, outfile);
+    	
+	 }catch (IOException ex) {
+		System.out.println(ex.getMessage());
+	}finally {
+		outfile.flush();
+		outfile.close();
+	}	
         SecretKey key = keyGen.generateKey();   //secret key to code the file
         secretKeyEncrypted= RSAUtil.wrapKey( pubkey,key); //encrypted by "RSA/ECB/OAEPWithSHA1AndMGF1Padding" public key
       
@@ -219,7 +246,7 @@ public class SendMessageEndpoint {
 						 FileOutputStream out = new FileOutputStream(file);
 						 try {
 						 workbook.write(out);
-						 FileOutputStream outfile = new FileOutputStream("./OutGFGsheet.xlsx");
+				//		 FileOutputStream outfile = new FileOutputStream("./OutGFGsheet.xlsx");
 					
 					    	try (FileInputStream in = new FileInputStream(file) ) {
 					    		 Cipher cipher = Cipher.getInstance("DES/ECB/PKCS5Padding");
