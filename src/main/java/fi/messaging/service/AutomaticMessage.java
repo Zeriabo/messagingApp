@@ -1,0 +1,58 @@
+package fi.messaging.service;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URL;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+
+import javax.ws.rs.core.Response;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import fi.messaging.pojos.Email;
+import fi.messaging.pojos.Message;
+import fi.messaging.rest.SendMessageEndpoint;
+
+public class AutomaticMessage {
+	List<String> receivers = Arrays.asList("zeriab2@hotmail.com","zeriab4@hotmail.com","zeriab1@hotmail.com","zeriab@hotmail.com");
+	  public static final String message = "Hello this is an automatic message";
+	  Email email= new Email(100, "1", "Automatic Message", "Automatic Message", new Date(), 0,
+				 receivers);
+
+	  
+	  
+	  
+	  public  void execute() throws IOException, InterruptedException
+	  {
+		 SendMessageByJava(email);
+		  System.out.println("Executed");
+	  }
+	private void SendMessageByJava(Email m) throws IOException, InterruptedException {
+		
+
+	        var objectMapper = new ObjectMapper();
+	        String requestBody = objectMapper
+	                .writeValueAsString(m);
+
+	        HttpClient client = HttpClient.newHttpClient();
+	        HttpRequest request = HttpRequest.newBuilder()
+	                .uri(URI.create("http://localhost:8080/sendmessage"))
+	                .POST(HttpRequest.BodyPublishers.ofString(requestBody))
+	                .build();
+
+	        HttpResponse<String> response = client.send(request,
+	                HttpResponse.BodyHandlers.ofString());
+
+	        System.out.println(response.body());
+	}
+
+}

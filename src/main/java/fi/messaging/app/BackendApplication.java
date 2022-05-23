@@ -7,7 +7,7 @@ import org.glassfish.jersey.jetty.JettyHttpContainerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.servlet.ServletContainer;
 
-import fi.messaging.service.MyTaskExecutor;
+import fi.messaging.service.TaskExecutor;
 
 import javax.ws.rs.core.UriBuilder;
 import java.net.URI;
@@ -35,7 +35,7 @@ public class BackendApplication {
         }));
         server.start();
         
-        MyTaskExecutor mt = new MyTaskExecutor();
-        mt.startExecutionAt(8, 00, 0);
+        TaskExecutor taskExecutor = new TaskExecutor();
+        taskExecutor.startExecutionAt(23,10 , 0);
    }
 }

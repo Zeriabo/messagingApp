@@ -3,20 +3,21 @@ package fi.messaging.rest;
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import javax.ws.rs.core.Response;
-import javax.xml.bind.DatatypeConverter;
 
 import fi.messaging.app.DatabaseConnection;
+import fi.messaging.pojos.TripleKeys;
 import fi.messaging.pojos.Email;
 import fi.messaging.pojos.Message;
 import fi.messaging.pojos.MessagesPojo;
 import fi.messaging.pojos.Receiver;
+import fi.messaging.pojos.Response;
 import fi.messaging.pojos.Sender;
 import fi.messaging.security.RSAKeyPairGenerator;
 import fi.messaging.security.RSAUtil;
@@ -24,12 +25,16 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.security.Key;
 import java.security.KeyFactory;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
 import java.security.PrivateKey;
 import java.security.PublicKey;
-import java.security.Signature;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.sql.Connection;
@@ -38,8 +43,6 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ThreadLocalRandom;
-
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -59,111 +62,71 @@ public class SendMessageEndpoint {
 	public Response sendMessage(String messageDetails) throws Exception {
 
 		ObjectMapper mapper = new ObjectMapper();
+		Response response = new Response();
+		XSSFWorkbook workbook;
+        XSSFSheet spreadsheet;
+        TripleKeys tripleKeys;
 		Email email = mapper.readValue(messageDetails, Email.class);
 		int messageId = -1;
 		int sQuery=0;
 		int rQuery=0;
-		Response response =null;
+		
 		ArrayList<Message> messagesList = new ArrayList<Message>();
-		int senderId = Integer.parseInt(email.getSenderId());
 		List<String> receiversArray = email.getReceivers();
-		XSSFWorkbook workbook;
-		  // spreadsheet object
-        XSSFSheet spreadsheet;
-        File file = new File("./GFGsheetDecrypted.xlsx"); 
-        KeyFactory kf = KeyFactory.getInstance("RSA");
-     // Generate a DES key
-        KeyGenerator keyGen = KeyGenerator.getInstance("DES");
-        SecretKey  secretKeyDecrypted = null;	
-        		
-        		
-        //Getting the public key
-        byte[] publicbytes = Files.readAllBytes(Paths.get("./key.pub"));
-        X509EncodedKeySpec ks1 = new X509EncodedKeySpec(publicbytes); 
-        PublicKey pubkey= kf.generatePublic(ks1); // public key to encrypt the secret key
-        
-        //Getting the private key
-        byte[] privatebytes = Files.readAllBytes(Paths.get("./key.key"));
-        PKCS8EncodedKeySpec ks = new PKCS8EncodedKeySpec(privatebytes);
-        PrivateKey pvts = kf.generatePrivate(ks); 
-        
-     // create a challenge
-        byte[] challenge = new byte[10000];
-        ThreadLocalRandom.current().nextBytes(challenge);
-        
-     // sign using the private key
-        Signature sig = Signature.getInstance("SHA256withRSA");
-        sig.initSign(pvts);
-        sig.update(challenge);
-        byte[] signature = sig.sign();
+		
+		int senderId = Integer.parseInt(email.getSenderId());
+		
+		
+		/*
+		 * Files
+		 */
+		File file = new File("./OutGFGsheet.xlsx"); 
+		File privateFile = new File("./private/file"); //file to save the private key to
+		boolean created=privateFile.createNewFile();
+		if(created) {
+			tripleKeys  =  generateKeys();
+		}else {
+			   byte[] privatebytes = Files.readAllBytes(Paths.get("./key.key"));
+		        PKCS8EncodedKeySpec ks = new PKCS8EncodedKeySpec(privatebytes);
+		        byte[] publicbytes = Files.readAllBytes(Paths.get("./key.pub"));
+		        X509EncodedKeySpec ks1 = new X509EncodedKeySpec(publicbytes); 
+		        KeyFactory kf = KeyFactory.getInstance("RSA");
+		        
+		        PrivateKey pvts = kf.generatePrivate(ks); //private key to decrypt the secret key
+		        PublicKey pubkey= kf.generatePublic(ks1); // public key to encrypt the secret key   
+		        //Secret key
+		        byte[] encodedsecretkeybytes = Files.readAllBytes(Paths.get("./semetrickey.key"));
+		        Key key= RSAUtil.unWrapKey(pvts, encodedsecretkeybytes);//right one
+		        byte[] secretEncoded=key.getEncoded();
+		        
+		        
+		        SecretKey secretKey=new SecretKeySpec(secretEncoded,0,secretEncoded.length,"DES");
 
-        // verify signature using the public key
-        sig.initVerify(pubkey);
-        sig.update(challenge);
-
-//        SecretKey key = keyGen.generateKey();   //secret key to code the file
-//        secretKeyEncrypted= RSAUtil.wrapKey( pubkey,key); //encrypted by "RSA/ECB/OAEPWithSHA1AndMGF1Padding" public key
-//        System.out.print("The Symmetric Key is :"
-//                + DatatypeConverter.printHexBinary(
-//                		key.getEncoded()));
-//        File file2 = new File("./semetrickey.key");
-//        FileOutputStream oute=new FileOutputStream(file2);
-//        oute.write(secretKeyEncrypted);
-     
-        
-        boolean keyPairMatches = sig.verify(signature);
-        
-        
-        
-       if(keyPairMatches)
-       {
-          try {
-           //Get Semetric key from the file 
-           File semetricKeyFile= new File("./semetrickey.key");
-         
-          try( FileInputStream fin = new FileInputStream(semetricKeyFile))
-          {         	
-        	  byte[] secretKeyEncryptedRetrieved=fin.readAllBytes() ;
-        	     secretKeyDecrypted= RSAUtil.unWrapKey( pvts,secretKeyEncryptedRetrieved);
-
-          }
-       
-
-           
-           Cipher cipher = Cipher.getInstance("DES/ECB/PKCS5Padding");
-           cipher.init(Cipher.DECRYPT_MODE, secretKeyDecrypted);
-           File inputFile=  new File("GFGsheetEncrypted.xlsx");
-           FileInputStream inputStream = new FileInputStream(inputFile);
-           byte[] inputBytes = new byte[(int) inputFile.length()];
-           inputStream.read(inputBytes);
-           
-           byte[] outputBytes = cipher.doFinal(inputBytes);
-           FileOutputStream outputStream = new FileOutputStream("./GFGsheetDecrypted.xlsx");
-           outputStream.write(outputBytes);
-           inputStream.close();
-           outputStream.close();
-          }catch (Exception ex) {
-              throw new Exception("Error encrypting/decrypting file", ex);
-          }
-       }
-
+		        tripleKeys = new TripleKeys();
+		        tripleKeys.setPrivateKey(pvts);
+		        tripleKeys.setPublicKey(pubkey);
+		        tripleKeys.setSecretKey(secretKey);
+		}
         if(file.exists())
-        {   
-        	FileInputStream fis = new FileInputStream(file);
-
-        	workbook = new XSSFWorkbook(fis);
+        {    
+        FileOutputStream outStream = new FileOutputStream("./GFGsheetDecrypted.xlsx");
+    	FileInputStream fis = new FileInputStream(file);
+        	
+       	 Cipher cipher = Cipher.getInstance("DES/ECB/PKCS5Padding");
+	    	cipher.init(Cipher.DECRYPT_MODE, tripleKeys.getSecretKey());
+	    	 RSAUtil.processFile(cipher, fis, outStream);
+       
+	    	 FileInputStream fileInputStream=new FileInputStream("./GFGsheetDecrypted.xlsx");
+	    	 
+	    	 
+        	workbook = new XSSFWorkbook(fileInputStream);
         	spreadsheet=workbook.getSheet("secret keys");
         	if (spreadsheet == null) {
         		spreadsheet = workbook.createSheet("secret keys");
         	}
         	
         	fis.close();
-        }else  if(!file.exists())
-        {   
-        	
-        	throw new Exception("File does not exists");
-        	
-        }	else {
+        }else {
         	 workbook = new XSSFWorkbook();
                 spreadsheet
                 = workbook.createSheet("secret keys");	
@@ -277,19 +240,18 @@ public class SendMessageEndpoint {
 						 FileOutputStream out = new FileOutputStream(file);
 						 try {
 						 workbook.write(out);
-		
-					
+						 FileOutputStream outfile = new FileOutputStream("./OutGFGsheet.xlsx");
+						 RSAUtil.wrapKey(tripleKeys.getPublicKey(), tripleKeys.getSecretKey());
 					    	try (FileInputStream in = new FileInputStream(file) ) {
 					    		 Cipher cipher = Cipher.getInstance("DES/ECB/PKCS5Padding");
-					 	    	cipher.init(Cipher.ENCRYPT_MODE, secretKeyDecrypted);
-					 	         byte[] outputBytes = cipher.doFinal(in.readAllBytes());
-					 	           FileOutputStream outputStream = new FileOutputStream("./GFGsheetEncrypted.xlsx");
-					 	           outputStream.write(outputBytes);
-					 	           file.delete();
+					 	    	cipher.init(Cipher.ENCRYPT_MODE, tripleKeys.getSecretKey());
+					        RSAUtil.processFile(cipher, in, outfile);
 					    	}
 						 }catch (IOException ex) {
 							System.out.println(ex.getMessage());
 						}finally {
+							File fileToDelete=new File("./GFGsheetDecrypted.xlsx");
+							fileToDelete.delete();
 							out.flush();
 							out.close();
 							
@@ -302,43 +264,89 @@ public class SendMessageEndpoint {
 							ins2.setInt(3, messageId);
 							ins2.setInt(4, senderId);
 							 rQuery=ins2.executeUpdate();
-			
+							
+							
 						}
-						
                         }else {
-
-                        	response= Response.status(Response.Status.NOT_FOUND).build();
+                        	response.setStatus(false);
+    						response.setErrorMessage("ERROR: Wrong input sender is not found!");
+    						response.setCode(500);
+    						return response;
                         }
 
 					}else {
-				
-						//response.setErrorMessage("ERROR: Wrong input");
-						
-						response= Response.status(Response.Status.NOT_ACCEPTABLE).build();
+						response.setStatus(false);
+						response.setErrorMessage("ERROR: Wrong input");
+						response.setCode(500);
+						return response;
 					}
 				}catch(Exception e)
 				{
-					response= Response.serverError().entity(e.getMessage()).build();
+					response.setStatus(false);
+					response.setErrorMessage(e.getMessage());
+					response.setCode(e.hashCode());
+					return response;
 				}
 			}
 			if(messageId!=0 && rQuery>0 && sQuery>0 )
 			{
-				response= Response.ok(messages).build();
+				Response successResponse = new Response(200,true,messages);
+				return successResponse;
 			}
 
 	
 		} else if (receiversArray.size() > 5) {
-			return Response.status(Response.Status.NOT_ACCEPTABLE).build();
-			//response.setErrorMessage("more than 5 receipient");
+			response.setStatus(false);
+			response.setCode(500);
+			response.setErrorMessage("more than 5 receipient");
 		} else {
-			 response =Response.status(Response.Status.NOT_ACCEPTABLE).build();
-	   
+			response.setStatus(false);
+	     	response.setErrorMessage("ERROR : not inserted");
+			response.setCode(500);
 		}
-		return response;
 	
     	
-	
+		return response;
 
+	}
+	private TripleKeys generateKeys() throws Exception{
+		/*
+		 * keys to code and decode the semetric key for encryting the file  
+		 */
+        byte[] privatebytes = Files.readAllBytes(Paths.get("./key.key"));
+        PKCS8EncodedKeySpec ks = new PKCS8EncodedKeySpec(privatebytes);
+        byte[] publicbytes = Files.readAllBytes(Paths.get("./key.pub"));
+        X509EncodedKeySpec ks1 = new X509EncodedKeySpec(publicbytes); 
+        KeyFactory kf = KeyFactory.getInstance("RSA");
+        PrivateKey pvts = kf.generatePrivate(ks); //private key to decrypt the secret key
+        PublicKey pubkey= kf.generatePublic(ks1); // public key to encrypt the secret key
+        /*
+		 * end of getting the keys 
+		 */
+        File privateFile = new File("./private/file");
+         //saving the private key to decrypt the secured file
+        try (FileOutputStream fos = new FileOutputStream(privateFile)) {
+        	
+            fos.write(pvts.getEncoded());
+            fos.flush();
+            fos.close();
+        }
+       
+        // Generate a DES key
+        KeyGenerator keyGen = KeyGenerator.getInstance("DES");
+        SecretKey key = keyGen.generateKey();   //secret key to code the file
+        secretKeyEncrypted= RSAUtil.wrapKey( pubkey,key); //encrypted by "RSA/ECB/OAEPWithSHA1AndMGF1Padding"
+      
+        File file2 = new File("./semetrickey.key");
+        FileOutputStream oute=new FileOutputStream(file2);
+        oute.write(secretKeyEncrypted);
+        
+        TripleKeys dualKeys = new TripleKeys();
+        dualKeys.setPrivateKey(pvts);
+        dualKeys.setSecretKey(key);
+        
+		return dualKeys;
+		
 	}
 
 	   
