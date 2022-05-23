@@ -3,9 +3,12 @@ package fi.messaging.rest;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.PushbackInputStream;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.KeyFactory;
@@ -27,8 +30,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Scanner;
 import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
+import javax.crypto.SecretKey;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -67,14 +72,45 @@ public class ReadMessageEndpoint {
 		 InputStream inputStream = null;
 		Response response = null;
 		MessagesPojo messages = new MessagesPojo();	
-		  String path = "./GFGsheet.xlsx";
-		  inputStream = new FileInputStream(path);
+		KeyFactory kf = KeyFactory.getInstance("RSA");
+		File file = new File("./GFGsheetDecrypted.xlsx"); 
+		  String path = "./GFGsheetEncrypted.xlsx";
+		File  inputFile = new File(path);
+		  //Getting the private key
+	        byte[] privatebytes = Files.readAllBytes(Paths.get("./key.key"));
+	        PKCS8EncodedKeySpec ks = new PKCS8EncodedKeySpec(privatebytes);
+	        PrivateKey pvts = kf.generatePrivate(ks); 
+		  
+		  //Get Semetric key from the file 
+          File semetricKeyFile= new File("./semetrickey.key");
+        
+         try( FileInputStream fin = new FileInputStream(semetricKeyFile))
+         {         	
+       	  byte[] secretKeyEncryptedRetrieved=fin.readAllBytes() ;
+       	 SecretKey secretKeyDecrypted= RSAUtil.unWrapKey( pvts,secretKeyEncryptedRetrieved);
+       	  Cipher cipher = Cipher.getInstance("DES/ECB/PKCS5Padding");
+          cipher.init(Cipher.DECRYPT_MODE, secretKeyDecrypted);
+          try (FileInputStream inputStream1 = new FileInputStream(inputFile)) {
+			byte[] inputBytes = new byte[(int) inputFile.length()];
+			  inputStream1.read(inputBytes);
+			  byte[] outputBytes = cipher.doFinal(inputBytes);
+	           FileOutputStream outputStream = new FileOutputStream(file);
+	           outputStream.write(outputBytes);
+	           inputStream1.close();
+	           outputStream.close();
+		}
+          
+         }
+         
+		  
+		  inputStream = new FileInputStream(file);
 		  XSSFWorkbook workBook = (XSSFWorkbook) WorkbookFactory.create(new PushbackInputStream(inputStream));
 		  XSSFSheet mySheet = workBook.getSheetAt(0);
 		  Iterator<Row> rowIterator = mySheet.iterator();
 		  byte[] bytes =null;
 		  byte[] decode = null;
 		  byte[] privateKey = null;
+		  
 		try (Connection c = DatabaseConnection.getConnection()) {
 
 			PreparedStatement p1 = c.prepareStatement("SELECT * FROM users where email=?");
