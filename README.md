@@ -43,11 +43,13 @@ please feel free to see the app on the master branch.
 
 Updates:
 making second backup for the keys on excel file if the key not found in the database it will search the message from the crypted excel file <br />
-Automatic message implemented running everyday at 12:00:00
+Automatic message implemented running everyday at 12:00:00.
+
+Login implemented users can login to the system.
+
 
 Remark: the code is on a regular updates.<br />
 
-Coming update: making a login for the user<br />
 Coming update: users can't read other users messages<br />
 Coming update: handle SQL injection<br />
 Coming update: Creating a signup request api the the automatic task will activate the requested accounts<br />
