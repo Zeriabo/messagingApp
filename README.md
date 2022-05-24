@@ -43,7 +43,7 @@ please feel free to see the app on the master branch.
 
 Updates:
 making second backup for the keys on excel file if the key not found in the database it will search the message from the crypted excel file <br />
-Automatic message implemented runningeveryday at 12:00:00
+Automatic message implemented running everyday at 12:00:00
 
 Remark: the code is on a regular updates.<br />
 
