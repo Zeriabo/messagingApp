@@ -25,7 +25,7 @@ import fi.messaging.rest.SendMessageEndpoint;
 public class AutomaticMessage {
 	List<String> receivers = Arrays.asList("zeriab2@hotmail.com","zeriab4@hotmail.com","zeriab1@hotmail.com","zeriab@hotmail.com");
 	  public static final String message = "Hello this is an automatic message";
-	  Email email= new Email(100, "1", "Automatic Message", "Automatic Message", new Date(), 0,
+	  Email email= new Email(100, "1", "Automatic Message", "Automatic Message", new Date(), 4,
 				 receivers);
 
 	  

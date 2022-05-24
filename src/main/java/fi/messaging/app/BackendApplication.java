@@ -36,6 +36,6 @@ public class BackendApplication {
         server.start();
         
         TaskExecutor taskExecutor = new TaskExecutor();
-        taskExecutor.startExecutionAt(23,10 , 0);
+        taskExecutor.startExecutionAt(12,0, 0);
    }
 }
