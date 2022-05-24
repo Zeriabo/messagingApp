@@ -16,7 +16,6 @@ public class TaskExecutor  {
 	   
 	    volatile boolean isStopIssued;
 
-
 		public void startExecutionAt(int targetHour, int targetMin, int targetSec)
 	    {
 	        Runnable taskWrapper = new Runnable(){

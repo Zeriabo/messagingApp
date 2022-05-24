@@ -10,11 +10,13 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.NewCookie;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fi.messaging.app.DatabaseConnection;
 import fi.messaging.pojos.User;
 import fi.messaging.pojos.UserPojo;
-
+import javax.ws.rs.core.Cookie;
 import javax.ws.rs.core.Response;
 
 @Path("/login")
@@ -38,6 +40,8 @@ public class LoginEndpoint {
 			ResultSet r = p1.executeQuery();
 			if (r.next()) {
 				
+				 NewCookie cookie = new NewCookie("user", user.toString());
+			
 				User loggedInUser= new User();
 				
 				int userId = r.getInt(1);
@@ -46,7 +50,7 @@ public class LoginEndpoint {
        			loggedInUser.setEmail(r.getString(3));
        			loggedInUser.setPassword(r.getString(4));
 				
-		        response= Response.ok(loggedInUser).build();
+		        response= Response.ok(loggedInUser).cookie(cookie).build();
 			}else {
 				response= Response.notAcceptable(null).build();
 			}
