@@ -13,7 +13,7 @@ public class User {
    }
 	public User(int idUser,String name, String email)
 	{
-	
+	    this.idUser=idUser;
 		this.name=name;
 		this.email=email;
 

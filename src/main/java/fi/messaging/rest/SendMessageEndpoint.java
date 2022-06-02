@@ -252,7 +252,7 @@ public class SendMessageEndpoint {
     						
     						
     						
-						Sender sender = new Sender(rsusers.getInt(1), rsusers.getString(2), rsusers.getString(3));
+						Sender sender = new Sender(senderId, rsusers.getString(2), rsusers.getString(3));
 						rsusers.first();
 
 						PreparedStatement ins1 = c
