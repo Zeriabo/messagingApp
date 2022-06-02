@@ -40,7 +40,7 @@ public class LoginEndpoint {
 			ResultSet r = p1.executeQuery();
 			if (r.next()) {
 				
-				 NewCookie cookie = new NewCookie("user", user.toString());
+				 NewCookie cookie = new NewCookie("user", user.getEmail());
 			
 				User loggedInUser= new User();
 				
