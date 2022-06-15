@@ -24,6 +24,12 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.CookieHandler;
+import java.net.CookieManager;
+import java.net.CookieStore;
+import java.net.HttpCookie;
+import java.net.URL;
+import java.net.URLConnection;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.KeyFactory;
@@ -58,12 +64,52 @@ public class SendMessageEndpoint {
 
 	public Response sendMessage(String messageDetails) throws Exception {
 
+		//Check the cookie
+	      CookieManager cookieManager = new CookieManager();
+	      
+	      CookieHandler.setDefault(cookieManager);
+	  
+	  
+	  
+	      CookieStore cookieStore = cookieManager.getCookieStore();
+	  
+	      List<HttpCookie> cookieList = cookieStore.getCookies();
+		
+	      
+	      for (HttpCookie cookie : cookieList) 
+	      {
+	         //gets domain set for the cookie
+	         System.out.println("Domain: "+cookie.getDomain());
+	  
+	         //gets max age of the cookie
+	         System.out.println("max age: "+cookie.getMaxAge());
+	  
+	         // gets name cookie
+	         System.out.println("name of cookie: "+cookie.getName());
+	  
+	         //gets path of the server
+	         System.out.println("server path: "+cookie.getPath());
+	  
+	         //gets boolean if cookie is being sent with secure protocol
+	         System.out.println("is cookie secure: "+cookie.getSecure());
+	  
+	         //gets the value of the cookie
+	         System.out.println("value of cookie: "+cookie.getValue());
+	  
+	        //gets the version of the protocol with which the given cookie is related.
+	        System.out.println("value of cookie: "+cookie.getVersion());
+	      }
+	      
+	      
+	      
+	      
+	      
 		ObjectMapper mapper = new ObjectMapper();
 		Email email = mapper.readValue(messageDetails, Email.class);
 		int messageId = -1;
 		int sQuery=0;
 		int rQuery=0;
-		Response response =null;
+		Response response=null;
 		ArrayList<Message> messagesList = new ArrayList<Message>();
 		int senderId = Integer.parseInt(email.getSenderId());
 		List<String> receiversArray = email.getReceivers();

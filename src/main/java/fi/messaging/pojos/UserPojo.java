@@ -1,5 +1,7 @@
 package fi.messaging.pojos;
 
+import org.json.JSONObject;
+
 public class UserPojo {
 	private String email;
 	private String password;
@@ -29,5 +31,11 @@ public class UserPojo {
 	public void setPassword(String password) {
 		this.password = password;
 	}
-
+   public JSONObject getUserJSON() {
+	   
+	   JSONObject userJSON = new JSONObject(this.email);
+	   
+	return userJSON;
+	   
+   }
 }
