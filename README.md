@@ -49,11 +49,26 @@ Login implemented users can login to the system.
 
 Sign in feature implemented
 
+* Usage:
+
+ use http://localhost:8080/sendmessage to send a message with a JSON body like:
+    {
+   "senderId":1,
+   "receiptsnbr":1,
+   "receivers":["zeriab2@hotmail.com"],
+   "title":"Hello",
+   "messagebody":"messagebody"
+    }
+    
+ use http://localhost:8080/readmessage to read messages for a certain user with email as a JSON body 
+ 
+ 
 
 Remark: the code is on a regular updates.<br />
 
 Coming update: users can't read other users messages<br />
 Coming update: Creating a signup request api the the automatic task will activate the requested accounts<br />
 Coming update: creating a react app which interact with the java backend<br />
+Coming update: after signin Implemented it will require a token and compare the token if it belongs to the requested user then it will return the messages 
 
 
