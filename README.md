@@ -67,6 +67,7 @@ Sign in feature implemented
 
 Remark: the code is on a regular updates.<br />
 
+Coming update: generate token on sign in
 Coming update: users can't read other users messages<br />
 Coming update: Creating a signup request api the the automatic task will activate the requested accounts<br />
 Coming update: creating a react app which interact with the java backend<br />
