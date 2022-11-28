@@ -43,10 +43,10 @@ get the messages from the file
 please feel free to see the app on the master branch.
 
 Updates:
-making second backup for the keys on excel file if the key not found in the database it will search the message from the crypted excel file <br />
-Automatic message implemented running everyday at 12:00:00.
-
-Login implemented users can login to the system.
+* making second backup for the keys on excel file if the key not found in the database it will search the message from the crypted excel file <br />
+* Automatic message implemented running everyday at 12:00:00.
+* Login implemented users can login to the system.
+* generate token on sign in
 
 Sign in feature implemented
 
@@ -67,7 +67,6 @@ Sign in feature implemented
 
 Remark: the code is on a regular updates.<br />
 
-Coming update: generate token on sign in
 Coming update: users can't read other users messages<br />
 Coming update: Creating a signup request api the the automatic task will activate the requested accounts<br />
 Coming update: creating a react app which interact with the java backend<br />
