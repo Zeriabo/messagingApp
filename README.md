@@ -48,7 +48,6 @@ Updates:
 * Login implemented users can login to the system.
 * generate token on sign in
 
-Sign in feature implemented
 
 * Usage:
 
