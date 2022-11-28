@@ -43,7 +43,7 @@ get the messages from the file
 please feel free to see the app on the master branch.
 
 Updates:
-* making second backup for the keys on excel file if the key not found in the database it will search the message from the crypted excel file <br />
+* making second backup for the keys on excel file if the key not found in the database it will search the message from the encrypted excel file <br />
 * Automatic message implemented running everyday at 12:00:00.
 * Login implemented users can login to the system.
 * generate token on sign in
