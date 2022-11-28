@@ -47,6 +47,7 @@ Updates:
 * Automatic message implemented running everyday at 12:00:00.
 * Login implemented users can login to the system.
 * generate token on sign in
+* validate the token return 705 
 
 
 * Usage:
