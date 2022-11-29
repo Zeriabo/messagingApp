@@ -63,7 +63,7 @@ Updates:
     
  use http://localhost:8080/readmessage to read messages for a certain user with email as a JSON body 
  
- 
+ use http://localhost:8080/user/validate?token=TOKEN to validate a tocken is right should return boolean
 
 Remark: the code is on a regular updates.<br />
 
