@@ -49,6 +49,7 @@ Updates:
 * generate token on sign in
 * validate the token return 705 
 * the read operation should contain JWT so each user reads his own messages
+* Creating a signup request api the automatic task will activate the requested accounts using Quartz library every 3 hours
 
 
 * Usage:
@@ -68,7 +69,7 @@ Updates:
 
 Remark: the code is on a regular updates.<br />
 
-Coming update: Creating a signup request api the the automatic task will activate the requested accounts using Quartz library<br />
+Coming update: 
 Coming update: creating a react app which interact with the java backend<br />
 
 
