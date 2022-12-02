@@ -71,6 +71,8 @@ Updates:
 Remark: the code is on a regular updates.<br />
 
 Coming update: 
+
+Coming update: Creating tests
 Coming update: creating a react app which interact with the java backend<br />
 
 
