@@ -49,7 +49,8 @@ Updates:
 * generate token on sign in
 * validate the token return 705 
 * the read operation should contain JWT so each user reads his own messages
-* Creating a signup request api the automatic task will activate the requested accounts using Quartz library every 3 hours
+* Creating a signup request api 
+* Automatic task will activate the requested accounts using Quartz library every 3 hours
 
 
 * Usage:
