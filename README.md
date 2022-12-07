@@ -75,6 +75,7 @@ Remark: the code is on a regular updates.<br />
 
 Coming update: 
 
+Coming update: use the Logger  <br />
 Coming update: Creating tests <br />
 Coming update: creating a react app which interact with the java backend<br />
 
