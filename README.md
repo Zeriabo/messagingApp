@@ -52,14 +52,8 @@ Updates:
 * Creating a signup request api 
 * Automatic task will activate the requested accounts using Quartz library every 3 hours
 
-- For creating triggers for created and updated dates in the database use the query:
- CREATE TRIGGER NAME_TRIGGER BEFORE INSERT ON TABLE
-FOR EACH ROW
-SET NEW.created_at = NOW();
+- The database ddl statements exists on master branch
 
- CREATE TRIGGER NAME_TRIGGER BEFORE UPDATE ON TABLE
-FOR EACH ROW
-SET NEW.updated_at = NOW();
 
 
 * Usage:
