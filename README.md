@@ -77,6 +77,8 @@ Coming update:
 
 Coming update: use the Logger  <br />
 Coming update: Implementing tests <br />
-Coming update: creating a react app which interact with the java backend<br />
+Coming update: sending notification for the frontend when message arrive <br />
+Coming update: Implement instant messaging feature <br />
+Coming update: creating a mobile react app which interact with the java backend<br />
 
 
