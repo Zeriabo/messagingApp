@@ -73,7 +73,7 @@ Updates:
 
 Remark: the code is on a regular updates.<br />
 
-Coming update: 
+Coming updates: 
 
 Coming update: encrypt the passwords inside the database  <br />
 Coming update: use the Logger  <br />
