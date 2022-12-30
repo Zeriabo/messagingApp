@@ -75,6 +75,7 @@ Remark: the code is on a regular updates.<br />
 
 Coming update: 
 
+Coming update: encrypt the passwords inside the database  <br />
 Coming update: use the Logger  <br />
 Coming update: Implementing tests <br />
 Coming update: sending notification for the frontend when message arrive <br />
