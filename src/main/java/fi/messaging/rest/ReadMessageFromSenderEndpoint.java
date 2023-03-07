@@ -15,6 +15,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ServiceLoader;
+
 import javax.ws.rs.core.Response;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import javax.crypto.BadPaddingException;
@@ -39,6 +41,8 @@ import io.jsonwebtoken.Claims;
 @Path("/readmessagefromsender")
 public class ReadMessageFromSenderEndpoint {
 
+	TokenService tokenService = getTokenService();
+	
 	@SuppressWarnings("static-access")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
@@ -48,7 +52,7 @@ public class ReadMessageFromSenderEndpoint {
 
 		Claims userVerified;
 		MessageService messageService = null;
-		TokenService   tokenService = new TokenService();
+	
 		Response response = null;
 		MessagesPojo messages = new MessagesPojo();
 	    ObjectMapper mapper = new ObjectMapper();
@@ -93,5 +97,12 @@ public class ReadMessageFromSenderEndpoint {
 	}
 	
 	
-	
+	public static TokenService getTokenService() {
+	    // load our plugin
+	 ServiceLoader<TokenService> serviceLoader =ServiceLoader.load(TokenService.class);
+	 for (TokenService provider : serviceLoader) {
+	     return provider;
+	 }
+	 throw new NoClassDefFoundError("Unable to load a driver "+TokenService.class.getName());
+	}
 }

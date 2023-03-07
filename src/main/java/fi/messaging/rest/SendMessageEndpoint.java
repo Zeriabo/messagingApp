@@ -13,7 +13,7 @@ import fi.messaging.pojos.Email;
 import fi.messaging.pojos.Message;
 import fi.messaging.pojos.MessagesPojo;
 import fi.messaging.service.CryptoService;
-import fi.messaging.service.FileManager;
+import fi.messaging.service.FileManagerService;
 import fi.messaging.service.MessageService;
 import fi.messaging.service.TokenService;
 import io.jsonwebtoken.Claims;
@@ -36,7 +36,10 @@ public class SendMessageEndpoint {
 	int row = 0;
 	byte[] secretKeyEncrypted;
 	PrivateKey pvtfile;
-	FileManager fileManager = new FileManager();
+	FileManagerService fileManager = getFileManagerService();
+	TokenService tokenService =getTokenService();
+	CryptoService cryptoService =getCryptoService();
+	
 	SecretKey symmetricKey;
 
 	
@@ -55,7 +58,7 @@ public class SendMessageEndpoint {
 		Email email = mapper.readValue(messageDetails, Email.class);
 		try {
 			
-			Claims claims =	TokenService.verifyJWT(email.getToken());
+			Claims claims =	tokenService.verifyJWT(email.getToken());
 	} catch (Exception ex) {
 		response = Response.serverError().entity(ex.getMessage()).build();
 		return response;
@@ -98,7 +101,7 @@ public class SendMessageEndpoint {
 
 		Signature sig = Signature.getInstance("SHA256withRSA");
 		// sign using the private key
-		byte[] signature = CryptoService.signWithPrivateKey(sig, pvts, challenge);
+		byte[] signature = cryptoService.signWithPrivateKey(sig, pvts, challenge);
 
 		// verify signature using the public key
 		sig.initVerify(pubkey);
@@ -146,6 +149,29 @@ public class SendMessageEndpoint {
      }
      throw new NoClassDefFoundError("Unable to load a driver "+MessageService.class.getName());
 	}
+	public static FileManagerService getFileManagerService() {
+	     // load our plugin
+    ServiceLoader<FileManagerService> serviceLoader =ServiceLoader.load(FileManagerService.class);
+    for (FileManagerService provider : serviceLoader) {
+        return provider;
+    }
+    throw new NoClassDefFoundError("Unable to load a driver "+FileManagerService.class.getName());
+	}
 	
-
+	public static TokenService getTokenService() {
+	     // load our plugin
+   ServiceLoader<TokenService> serviceLoader =ServiceLoader.load(TokenService.class);
+   for (TokenService provider : serviceLoader) {
+       return provider;
+   }
+   throw new NoClassDefFoundError("Unable to load a driver "+TokenService.class.getName());
+	}
+	public static CryptoService getCryptoService() {
+	     // load our plugin
+  ServiceLoader<CryptoService> serviceLoader =ServiceLoader.load(CryptoService.class);
+  for (CryptoService provider : serviceLoader) {
+      return provider;
+  }
+  throw new NoClassDefFoundError("Unable to load a driver "+CryptoService.class.getName());
+	}
 }

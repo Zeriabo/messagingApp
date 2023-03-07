@@ -3,6 +3,7 @@ package fi.messaging.service.impl;
 import java.sql.Connection;
 import io.jsonwebtoken.SignatureException;
 import java.util.Date;
+import java.util.ServiceLoader;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
@@ -18,6 +19,7 @@ import io.jsonwebtoken.Claims;
 
 public class UserServiceImpl implements UserService {
 
+	TokenService tokenService = getTokenService();
 	public User register(User user) throws Exception {
 
 		try (Connection c = DatabaseConnection.getConnection()) {
@@ -76,7 +78,7 @@ public class UserServiceImpl implements UserService {
 				user.setToken(bearerToken);
 				//Create a JWTToken
 				try {
-					bearerToken = TokenService.createJWT(Integer.toString(user.getIdUser()), user.getEmail(), "bearerToken",
+					bearerToken = tokenService.createJWT(Integer.toString(user.getIdUser()), user.getEmail(), "bearerToken",
 							7 * 24 * 60 * 60 * 1000);
 				    user.setToken(bearerToken);
 				} catch (Exception exp) {
@@ -86,7 +88,7 @@ public class UserServiceImpl implements UserService {
 				//Verify token:
 				try {
 
-					claims = TokenService.verifyJWT(bearerToken);
+					claims = tokenService.verifyJWT(bearerToken);
 
 				} catch (SignatureException sexp) {
 					throw sexp;
@@ -125,7 +127,7 @@ public class UserServiceImpl implements UserService {
 		
 		try {
 
-			Claims claims = TokenService.verifyJWT(token);
+			Claims claims = tokenService.verifyJWT(token);
 
 		} catch (SignatureException sexp) {
 			
@@ -268,5 +270,13 @@ public class UserServiceImpl implements UserService {
 		
 		
 		
+	}
+	public static TokenService getTokenService() {
+	    // load our plugin
+	 ServiceLoader<TokenService> serviceLoader =ServiceLoader.load(TokenService.class);
+	 for (TokenService provider : serviceLoader) {
+	     return provider;
+	 }
+	 throw new NoClassDefFoundError("Unable to load a driver "+TokenService.class.getName());
 	}
 }

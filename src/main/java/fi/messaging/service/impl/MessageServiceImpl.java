@@ -25,6 +25,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ServiceLoader;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -53,16 +54,18 @@ import fi.messaging.security.RSAKeyPairGenerator;
 import fi.messaging.security.RSAUtil;
 import fi.messaging.service.MessageService;
 import fi.messaging.service.TokenService;
+
 import io.jsonwebtoken.Claims;
 
 public class MessageServiceImpl implements MessageService
 {
+	TokenService tokenService = getTokenService();
 	@SuppressWarnings("resource")
 	public Response sendMessages(List<String> receiversArray, Email email, MessagesPojo messages, SecretKey secretKeyDecrypted) throws Exception
 	{
-
+	
 			
-			Claims claims =	TokenService.verifyJWT(email.getToken());
+			Claims claims =	tokenService.verifyJWT(email.getToken());
 			String senderemail=claims.getIssuer();
 			
 		int rQuery = 0;
@@ -334,7 +337,7 @@ public class MessageServiceImpl implements MessageService
 		SignInfo user = mapper.readValue(info, SignInfo.class);
 
 		try {
-			userVerified =	TokenService.verifyJWT(user.getToken());
+			userVerified =	tokenService.verifyJWT(user.getToken());
 		}catch(Exception ex)
 		{
 
@@ -463,6 +466,15 @@ public XSSFSheet getSheet() throws NoSuchAlgorithmException, IOException, Invali
 	inputStream.close();
 	
 	return mySheet;
+}
+
+public static TokenService getTokenService() {
+    // load our plugin
+ ServiceLoader<TokenService> serviceLoader =ServiceLoader.load(TokenService.class);
+ for (TokenService provider : serviceLoader) {
+     return provider;
+ }
+ throw new NoClassDefFoundError("Unable to load a driver "+TokenService.class.getName());
 }
 
 }
