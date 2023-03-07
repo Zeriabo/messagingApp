@@ -1,24 +1,19 @@
-package fi.messaging.service;
-
+package fi.messaging.service.impl;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.security.PrivateKey;
+
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
-import java.security.PrivateKey;
+
 import fi.messaging.security.RSAUtil;
+import fi.messaging.service.FileManagerService;
 
-public class FileManager {
+public class FileManagerImpl implements FileManagerService {
 
-	SecretKey symmetricKey;
 	
-	public FileManager()
-	{
-		
-	}
-	
-
 	public SecretKey savingMessageToFile(PrivateKey privateKey) throws Exception
 	{
 		
@@ -28,9 +23,9 @@ public class FileManager {
 
 			try (FileInputStream fin = new FileInputStream(symmetricKeyFile)) {
 				byte[] secretKeyEncryptedRetrieved = fin.readAllBytes();
-				symmetricKey = RSAUtil.unWrapKey(privateKey, secretKeyEncryptedRetrieved);
+				SecretKey		symmetricKey = RSAUtil.unWrapKey(privateKey, secretKeyEncryptedRetrieved);
 
-			} 
+			
 			Cipher cipher = Cipher.getInstance("DES/ECB/PKCS5Padding");
 			cipher.init(Cipher.DECRYPT_MODE, symmetricKey);
 			File inputFile = new File("GFGsheetEncrypted.xlsx");
@@ -45,7 +40,6 @@ public class FileManager {
 			outputStream.close();
 
 			return symmetricKey;
-		
+			}
 	}
-	
 }

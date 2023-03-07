@@ -6,7 +6,6 @@ import java.security.PrivateKey;
 import java.security.Signature;
 import java.security.SignatureException;
 import javax.crypto.SecretKey;
-import javax.crypto.KeyGenerator;
 
 public interface CryptoService
 {
