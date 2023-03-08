@@ -1,12 +1,10 @@
-package fi.messaging.service.impl;
+package fi.messaging.serviceImpl;
 
 import java.sql.Connection;
 import io.jsonwebtoken.SignatureException;
-import java.util.Date;
 import java.util.ServiceLoader;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-
 import fi.messaging.app.DatabaseConnection;
 import fi.messaging.exceptions.IncorrectCredentialsException;
 import fi.messaging.exceptions.UserDoesNotExistsException;
@@ -15,10 +13,10 @@ import fi.messaging.pojos.SignedUser;
 import fi.messaging.pojos.User;
 import fi.messaging.service.TokenService;
 import fi.messaging.service.UserService;
-import io.jsonwebtoken.Claims;
 
 public class UserServiceImpl implements UserService {
 
+	
 	TokenService tokenService = getTokenService();
 	public User register(User user) throws Exception {
 
@@ -60,7 +58,7 @@ public class UserServiceImpl implements UserService {
 
 		SignedUser user = new SignedUser();
 		String bearerToken = "";
-		Claims claims;
+	
 		try (Connection c = DatabaseConnection.getConnection()) {
 			PreparedStatement s = c.prepareStatement("SELECT * FROM users where email=? and password=?");
 			s.setString(1, email);
@@ -88,7 +86,7 @@ public class UserServiceImpl implements UserService {
 				//Verify token:
 				try {
 
-					claims = tokenService.verifyJWT(bearerToken);
+					 tokenService.verifyJWT(bearerToken);
 
 				} catch (SignatureException sexp) {
 					throw sexp;
@@ -127,7 +125,7 @@ public class UserServiceImpl implements UserService {
 		
 		try {
 
-			Claims claims = tokenService.verifyJWT(token);
+			tokenService.verifyJWT(token);
 
 		} catch (SignatureException sexp) {
 			
@@ -272,7 +270,7 @@ public class UserServiceImpl implements UserService {
 		
 	}
 	public static TokenService getTokenService() {
-	    // load our plugin
+	   
 	 ServiceLoader<TokenService> serviceLoader =ServiceLoader.load(TokenService.class);
 	 for (TokenService provider : serviceLoader) {
 	     return provider;

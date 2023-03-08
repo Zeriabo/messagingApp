@@ -1,4 +1,4 @@
-package fi.messaging.service.impl;
+package fi.messaging.serviceImpl;
 
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
