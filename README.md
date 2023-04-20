@@ -76,6 +76,7 @@ Remark: the code is on a regular updates.<br />
 Coming updates: 
 
 Coming update: implementing multi threading <br />
+Coming update: implementing RabbitMQ <br />
 Coming update: encrypt the passwords inside the database  <br />
 Coming update: use the Logger  <br />
 Coming update: Implementing tests <br />
