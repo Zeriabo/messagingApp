@@ -41,11 +41,8 @@ Logs can be read with `docker logs `
 Logs can be read with `docker logs messaging-db`
 =======
 Logs can be read with `docker logs messaging-db`
+
 #descripton
-
-
-Let's break down the encryption and decryption process in your code.
-
 Encryption:
 Generate RSA Key Pair:
 
